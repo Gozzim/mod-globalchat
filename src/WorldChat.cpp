@@ -235,6 +235,11 @@ void WorldChat::SendWorldChat(Player* player, std::string message)
             msg += ":|cffededed";
             break;
         default:
+            msg += "|cffffd500[";
+            msg += sWorldChat->ChannelName;
+            msg += "] ";
+            msg += GetNameLink(player);
+            msg += ":|cffededed";
             break;
     }
     chat_string << msg << " " << message;
