@@ -231,22 +231,6 @@ void WorldChat::SendWorldChat(Player* player, std::string message)
             msg += sWorldChat->ChannelName;
             msg += "] ";
             msg += "|TINTERFACE/CHATFRAME/UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
-            msg += "|Hplayer:" + player->GetName() + "|h" + "|cff9d14ff[" + player->GetName() + "|cff9d14ff]|h|r";
-            msg += ":|cffededed";
-            break;
-        case 4:
-            msg += "|cffffd500[";
-            msg += sWorldChat->ChannelName;
-            msg += "] ";
-            msg += "|TINTERFACE/CHATFRAME/UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
-            msg += "|Hplayer:" + player->GetName() + "|h" + "|cff9d14ff[" + player->GetName() + "|cff9d14ff]|h|r";
-            msg += ":|cffededed";
-            break;
-        case 5:
-            msg += "|cffffd500[";
-            msg += sWorldChat->ChannelName;
-            msg += "] ";
-            msg += "|TINTERFACE/CHATFRAME/UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
             msg += "|Hplayer:" + player->GetName() + "|h" + "|cffff0000[" + player->GetName() + "|cffff0000]|h|r";
             msg += ":|cffededed";
             break;
