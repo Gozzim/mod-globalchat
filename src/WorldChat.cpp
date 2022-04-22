@@ -12,7 +12,7 @@ WorldChat* WorldChat::instance()
     return &instance;
 }
 
-void WorldChat::LoadConfig(bool reload)
+void WorldChat::LoadConfig(bool /*reload*/)
 {
     WorldChatEnabled = sConfigMgr->GetOption<bool>("WorldChat.Enable", true);
     Announce = sConfigMgr->GetOption<bool>("WorldChat.Announce", true);
