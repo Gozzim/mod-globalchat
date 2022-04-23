@@ -52,6 +52,18 @@ WorldChat.OnFirstLogin = 1
 WorldChat.PlayTimeToChat = 300
 
 #
+#    WorldChat.Profanity.Block
+#        Description: Player Security Level (Rank) to block profanities. Also supports custom levels.
+#        Default:     0  - (Players)
+#                     1  - (Players + Moderators)
+#                     2  - (Players + Moderators + GMs)
+#                     3  - (Players + Moderators + GMs + Admins)
+#                     -1 - (Disabled)
+#
+
+WorldChat.Profanity.Block = 0
+
+#
 #    WorldChat.Profanity.MuteTime
 #        Description: MuteTime when player uses profanities or banned phrases
 #        Default:     30  - (seconds)
@@ -70,10 +82,22 @@ WorldChat.Profanity.MuteTime = 30
 WorldChat.Profanity.Blacklist = ""
 
 #
-#    WorldChat.URL.MuteTime (EXPERIMENTAL - Identification not perfect)
-#        Description: MuteTime when player posts URLs
+#    WorldChat.URL.Block (EXPERIMENTAL)
+#        Description: Player Security Level (Rank) to block URLs. Also supports custom levels.
+#        Default:     0 - (Players)
+#                     1 - (Players + Moderators)
+#                     2 - (Players + Moderators + GMs)
+#                     3 - (Players + Moderators + GMs + Admins)
+#                    -1 - (Disabled)
+#
+
+WorldChat.URL.Block = 0
+
+#
+#    WorldChat.URL.MuteTime
+#        Description: MuteTime when player posts URL. GMs will not get muted.
 #        Default:     120 - (seconds)
-#                     0   - (disabled)
+#                     0   - (Only disallow)
 #
 
 WorldChat.URL.MuteTime = 120

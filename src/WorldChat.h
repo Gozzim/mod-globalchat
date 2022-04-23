@@ -18,7 +18,9 @@ public:
     bool FactionSpecific;
     bool EnableOnLogin;
     uint32 MinPlayTime;
+    int BlockProfanities;
     uint32 ProfanityMute;
+    int BlockURLs;
     uint32 URLMute;
     uint32 CoolDown;
     bool JoinChannelAllowed;
