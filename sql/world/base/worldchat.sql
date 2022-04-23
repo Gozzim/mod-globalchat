@@ -5,13 +5,13 @@ INSERT INTO `acore_string` (`entry`, `content_default`, `locale_koKR`, `locale_f
 (17001, 'Player |cff00ff00%s|r tried to post URL: |cffff0000%s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (17002, 'cffffd500%s has %s the World Chat.|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
-DELETE FROM `command` WHERE  `name`='world';
+DELETE FROM `command` WHERE `name` IN ('world','w','chat','c','joinworld','leaveworld','enableworld','disableworld');
 INSERT INTO `command` (`name`, `security`, `help`) VALUES
-('world', 0, 'Syntax: .world $text\r\nWrite a message in world chat.\r\nAdditional commands: .showworld & .hideworld'),
-('w', 0, 'Syntax: .w $text\r\nWrite a message in world chat.\r\nAdditional commands: .showworld & .hideworld'),
-('c', 0, 'Syntax: .c $text\r\nWrite a message in world chat.\r\nAdditional commands: .showworld & .hideworld'),
-('chat', 0, 'Syntax: .chat $text\r\nWrite a message in world chat.\r\nAdditional commands: .showworld & .hideworld'),
-('showworld', 0, 'Shows the World Chat.'),
-('hideworld', 0, 'Hides the World Chat.'),
+('world', 0, 'Syntax: .world $text\r\nWrite a message in world chat.\r\nAdditional commands: .joinworld & .leaveworld'),
+('w', 0, 'Syntax: .w $text\r\nWrite a message in world chat.\r\nAdditional commands: .joinworld & .leaveworld'),
+('chat', 0, 'Syntax: .chat $text\r\nWrite a message in world chat.\r\nAdditional commands: .joinworld & .leaveworld'),
+('c', 0, 'Syntax: .c $text\r\nWrite a message in world chat.\r\nAdditional commands: .joinworld & .leaveworld'),
+('joinworld', 0, 'Join the World Chat.'),
+('leaveworld', 0, 'Leave the World Chat.'),
 ('enableworld', 1, 'Enables world chat.'),
 ('disableworld', 1, 'Disables world chat.');

@@ -261,7 +261,7 @@ void WorldChat::SendWorldChat(Player* player, const char* message)
 
     if (!WorldChatMap[guid].enabled)
     {
-        ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000World Chat is currently hidden. Type |r.showworld|cffff0000 to display the World Chat.|r");
+        ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000You have not joined the World Chat. Type |r.joinworld|cffff0000 to join the World Chat.|r");
         return;
     }
 
