@@ -117,10 +117,15 @@ std::string WorldChat::GetNameLink(Player* player)
 
     if (playerSecurity > 0)
     {
+        icons = "|TINTERFACE\\CHATFRAME\\UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
+
         if (playerSecurity < GMColors.size())
         {
             color = GMColors[playerSecurity];
-            icons = "|TINTERFACE\\CHATFRAME\\UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
+        }
+        else
+        {
+            color = GMColors[0];
         }
     }
 
