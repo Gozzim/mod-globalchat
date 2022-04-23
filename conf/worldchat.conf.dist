@@ -17,12 +17,28 @@ WorldChat.Enable = 1
 WorldChat.Announce = 1
 
 #
-#    WorldChat.ChannelName
+#    WorldChat.Chat.Name
 #        Description: WorldChat Name
 #        Default:     "World"
 #
 
-WorldChat.ChannelName = "World"
+WorldChat.Chat.Name = "World"
+
+#
+#    WorldChat.Chat.NameColor
+#        Description: Color the WorldChat Name is displayed in
+#        Default:     "FFFF00"
+#
+
+WorldChat.Chat.NameColor = "FFFF00"
+
+#
+#    WorldChat.Chat.TextColor
+#        Description: Changes the color the WorldChat content is displayed in
+#        Default:     "FFFFFF"
+#
+
+WorldChat.Chat.TextColor = "FFFFFF"
 
 #
 #    WorldChat.FactionSpecific
@@ -46,10 +62,37 @@ WorldChat.OnFirstLogin = 1
 #    WorldChat.PlayTimeToChat
 #        Description: Sets PlayTime until WorldChat can be used
 #        Default:     300 - (seconds)
-#                     0   - (disabled)
+#                     0   - (Disabled)
 #
 
 WorldChat.PlayTimeToChat = 300
+
+#
+#    WorldChat.CoolDown
+#        Description: Time until a new message can be sent in WorldChat
+#        Default:     2 - (seconds)
+#                     0 - (Disabled)
+#
+
+WorldChat.CoolDown = 2
+
+#
+#    WorldChat.JoinChannelAllowed
+#        Description: Enables /join for WorldChat
+#        Default:     0	- (Disabled)
+#                     1	- (Enabled)
+#
+
+WorldChat.JoinChannelAllowed = 0
+
+#
+#    WorldChat.GM.Colors
+#        Description: Colors for names of GMs in WorldChat. Ordered by Rank, starting at 1.
+#        Default:     "00FF00;091FE0;FF0000"
+#                     "" - (Disabled)
+#
+
+WorldChat.GM.Colors = "00FF00;091FE0;FF0000"
 
 #
 #    WorldChat.Profanity.Block
@@ -65,9 +108,9 @@ WorldChat.Profanity.Block = 0
 
 #
 #    WorldChat.Profanity.MuteTime
-#        Description: MuteTime when player uses profanities or banned phrases
-#        Default:     30  - (seconds)
-#                     0   - (disabled)
+#        Description: MuteTime when player uses profanities or banned phrases.
+#        Default:     30 - (seconds)
+#                     0  - (Disabled)
 #
 
 WorldChat.Profanity.MuteTime = 30
@@ -76,7 +119,7 @@ WorldChat.Profanity.MuteTime = 30
 #    WorldChat.Profanity.Blacklist
 #        Description: Blacklisted phrases separated by Semicolons (;)
 #           Example:  "hello;bye;see you;"
-#        Default:     "" (Disabled)
+#        Default:     "" - (Disabled)
 #
 
 WorldChat.Profanity.Blacklist = ""
@@ -110,24 +153,6 @@ WorldChat.URL.MuteTime = 120
 #
 
 WorldChat.URL.Whitelist = ""
-
-#
-#    WorldChat.CoolDown
-#        Description: Time until a new message can be sent in WorldChat
-#        Default:     2 - (seconds)
-#                     0 - (disabled)
-#
-
-WorldChat.CoolDown = 2
-
-#
-#    WorldChat.JoinChannelAllowed
-#        Description: Enables /join for WorldChat
-#        Default:     0	- (Disabled)
-#                     1	- (Enabled)
-#
-
-WorldChat.JoinChannelAllowed = 0
 
 #
 ###################################################################################################

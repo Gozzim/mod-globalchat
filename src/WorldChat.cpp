@@ -16,7 +16,9 @@ void WorldChat::LoadConfig(bool /*reload*/)
 {
     WorldChatEnabled = sConfigMgr->GetOption<bool>("WorldChat.Enable", true);
     Announce = sConfigMgr->GetOption<bool>("WorldChat.Announce", true);
-    ChannelName = sConfigMgr->GetOption<std::string>("WorldChat.ChannelName", "World");
+    ChatName = sConfigMgr->GetOption<std::string>("WorldChat.Chat.Name", "World");
+    ChatNameColor = sConfigMgr->GetOption<std::string>("WorldChat.Chat.NameColor", "FFFF00");
+    ChatTextColor = sConfigMgr->GetOption<std::string>("WorldChat.Chat.TextColor", "");
     FactionSpecific = sConfigMgr->GetOption<bool>("WorldChat.FactionSpecific", false);
     EnableOnLogin = sConfigMgr->GetOption<bool>("WorldChat.OnFirstLogin", true);
     MinPlayTime = sConfigMgr->GetOption<uint32>("WorldChat.PlayTimeToChat", 300);
@@ -26,6 +28,17 @@ void WorldChat::LoadConfig(bool /*reload*/)
     URLMute = sConfigMgr->GetOption<uint32>("WorldChat.URL.MuteTime", 120);
     CoolDown = sConfigMgr->GetOption<uint32>("WorldChat.CoolDown", 2);
     JoinChannelAllowed = sConfigMgr->GetOption<bool>("WorldChat.JoinChannelAllowed", false);
+
+    std::string configColors = sConfigMgr->GetOption<std::string>("WorldChat.GM.Colors", "00FF00;091FE0;FF0000");
+    GMColors.clear();
+    // Do not remove this
+    GMColors.push_back("808080");
+    std::string color;
+    std::istringstream colors(configColors);
+    while (std::getline(colors, color, ';'))
+    {
+        GMColors.push_back(color);
+    }
 
     std::string configProfanity = sConfigMgr->GetOption<std::string>("WorldChat.Profanity.Blacklist", "");
     ProfanityBlacklist.clear();
@@ -77,98 +90,166 @@ bool WorldChat::HasForbiddenURL(std::string message)
     return false;
 }
 
-const char* RACE_ICON;
+std::string WorldChat::GetChatPrefix()
+{
+    std::ostringstream chatPrefix;
+
+    if (!ChatName.empty())
+    {
+        chatPrefix << "|cff";
+        chatPrefix << (ChatNameColor.empty() ? "FFFF00" : ChatNameColor);
+        chatPrefix << "[" << ChatName << "]|r";
+    }
+
+    return chatPrefix.str();
+}
 
 std::string WorldChat::GetNameLink(Player* player)
 {
-    std::string name = player->GetName();
+    std::string playerName = player->GetName();
+    AccountTypes playerSecurity = player->GetSession()->GetSecurity();
+
+    const char* raceIcon;
+    const char* classIcon;
     std::string color;
-    std::string icon;
+    std::string icons;
+    std::ostringstream nameLink;
 
     switch (player->getClass())
     {
         case CLASS_DEATH_KNIGHT:
-            color = "|cffC41F3B";
-            icon = "|TInterface\\icons\\Spell_Deathknight_ClassIcon:12:12|t|r";
+            color = "C41F3B";
+            classIcon = "|TInterface\\icons\\Spell_Deathknight_ClassIcon:12:12|t|r";
             break;
         case CLASS_DRUID:
-            color = "|cffFF7D0A";
-            icon = "|TInterface\\icons\\Ability_Druid_Maul:12:12|t|r";
+            color = "FF7D0A";
+            classIcon = "|TInterface\\icons\\Ability_Druid_Maul:12:12|t|r";
             break;
         case CLASS_HUNTER:
-            color = "|cffABD473";
-            icon = "|TInterface\\icons\\INV_Weapon_Bow_07:12:12|t|r";
+            color = "ABD473";
+            classIcon = "|TInterface\\icons\\INV_Weapon_Bow_07:12:12|t|r";
             break;
         case CLASS_MAGE:
-            color = "|cff69CCF0";
-            icon = "|TInterface\\icons\\INV_Staff_13:12:12|t|r";
+            color = "69CCF0";
+            classIcon = "|TInterface\\icons\\INV_Staff_13:12:12|t|r";
             break;
         case CLASS_PALADIN:
-            color = "|cffF58CBA";
-            icon = "|TInterface\\icons\\INV_Hammer_01:12:12|t|r";
+            color = "F58CBA";
+            classIcon = "|TInterface\\icons\\INV_Hammer_01:12:12|t|r";
             break;
         case CLASS_PRIEST:
-            color = "|cffFFFFFF";
-            icon = "|TInterface\\icons\\INV_Staff_30:12:12|t|r";
+            color = "FFFFFF";
+            classIcon = "|TInterface\\icons\\INV_Staff_30:12:12|t|r";
             break;
         case CLASS_ROGUE:
-            color = "|cffFFF569";
-            icon = "|TInterface\\icons\\INV_ThrowingKnife_04:12:12|t|r";
+            color = "FFF569";
+            classIcon = "|TInterface\\icons\\INV_ThrowingKnife_04:12:12|t|r";
             break;
         case CLASS_SHAMAN:
-            color = "|cff0070DE";
-            icon = "|TInterface\\icons\\Spell_Nature_BloodLust:12:12|t|r";
+            color = "0070DE";
+            classIcon = "|TInterface\\icons\\Spell_Nature_BloodLust:12:12|t|r";
             break;
         case CLASS_WARLOCK:
-            color = "|cff9482C9";
-            icon = "|TInterface\\icons\\Spell_Nature_FaerieFire:12:12|t|r";
+            color = "9482C9";
+            classIcon = "|TInterface\\icons\\Spell_Nature_FaerieFire:12:12|t|r";
             break;
         case CLASS_WARRIOR:
-            color = "|cffC79C6E";
-            icon = "|TInterface\\icons\\INV_Sword_27.png:15|t|r";
+            color = "C79C6E";
+            classIcon = "|TInterface\\icons\\INV_Sword_27.png:15|t|r";
+            break;
+        default:
+            color = GMColors[0];
+            classIcon = "";
             break;
     }
-    return "|Hplayer:" + name + "|h" + color + "[" + name + "]|h|r";
+
+    if (playerSecurity > 0)
+    {
+        if (playerSecurity < GMColors.size())
+        {
+            color = GMColors[playerSecurity];
+            icons = "|TINTERFACE\\CHATFRAME\\UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
+        }
+    }
+
+    nameLink << icons;
+    nameLink << "|Hplayer:" << playerName << "|h";
+    nameLink << "|cff" << color << "[" << playerName << "]|h|r";
+
+    return nameLink.str();
 }
 
-void WorldChat::SendWorldChat(Player* player, std::string message)
+std::string WorldChat::BuildChatContent(const char* text)
 {
+    std::string content = text;
+    std::string color = ChatTextColor.empty() ? "|cffFFFFFF" : "|cff" + ChatTextColor;
+
+    if (content.find("|H") != std::string::npos && content.find("|h") != std::string::npos && content.find("|cff") != std::string::npos)
+    {
+        size_t pos = 0;
+        while ((pos = content.find("|h|r", pos)) != std::string::npos)
+        {
+            pos = content.find("|r", pos);
+            content.replace(pos, 2, color);
+            pos += 9;
+        }
+    }
+
+    return content;
+}
+
+std::string WorldChat::BuildChatMessage(std::string prefix, std::string nameLink, std::string content)
+{
+    std::ostringstream chat_stream;
+    std::string color = ChatTextColor.empty() ? "FFFFFF" : ChatTextColor;
+
+    chat_stream << prefix << " " << nameLink;
+    chat_stream << "|cff" << color;
+    chat_stream << ": " << content;
+
+    return chat_stream.str();
+}
+
+void WorldChat::SendWorldChat(Player* player, const char* message)
+{
+    if (!player)
+    {
+        return;
+    }
+
     uint64 guid = player->GetGUID().GetCounter();
+    const char* playerName = player->GetName().c_str();
     AccountTypes playerSecurity = player->GetSession()->GetSecurity();
+    std::string chatPrefix = GetChatPrefix();
+    std::string nameLink = GetNameLink(player);
+    std::string chatContent = BuildChatContent(message);
 
     if (playerSecurity == 0 && !sWorldChat->WorldChatEnabled)
     {
         ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000World Chat is currently disabled.|r");
         return;
     }
+
     if (!player->CanSpeak())
     {
         ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000You can't use the World Chat while muted.|r");
         return;
     }
+
     if (!sWorldChat->WorldChatMap[guid].enabled)
     {
         ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000World Chat is currently hidden. Type |r.showworld|cffff0000 to display the World Chat.|r");
         return;
     }
+
     if (sWorldChat->WorldChatMap[guid].last_msg + sWorldChat->CoolDown >= GameTime::GetGameTime().count() && playerSecurity == 0)
     {
         return;
     }
-    size_t stringpos;
-    if (message.find("|TInterface") != std::string::npos)
-        return;
-    if (message.find("\n") != std::string::npos)
-        return;
-    if ((stringpos = message.find("|H")) != std::string::npos && (stringpos = message.find("|h")) != std::string::npos && (stringpos = message.find("|c")) != std::string::npos)
+
+    if (chatContent.empty())
     {
-        stringpos = 0;
-        while ((stringpos = message.find("|h|r", stringpos)) != std::string::npos)
-        {
-            stringpos = message.find("|r", stringpos);
-            message.replace(stringpos, 2, "|cffededed");
-            stringpos += 9;
-        }
+        return;
     }
 
     if (BlockProfanities >= 0 && playerSecurity <= BlockProfanities && HasForbiddenPhrase(message))
@@ -181,7 +262,7 @@ void WorldChat::SendWorldChat(Player* player, std::string message)
 
         if (ProfanityMute > 0)
         {
-            sWorld->SendGMText(17000, player->GetName().c_str(), message.c_str()); // send passive report to gm
+            sWorld->SendGMText(17000, playerName, message); // send report to GMs
             ChatHandler(player->GetSession()).PSendSysMessage("Your message contains a forbidden phrase. You have been muted for %us.", ProfanityMute);
             LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME); // << ?
             int64 muteTime = time(NULL) + ProfanityMute; // muted player
@@ -190,7 +271,7 @@ void WorldChat::SendWorldChat(Player* player, std::string message)
         }
         else
         {
-            sWorld->SendGMText(17000, player->GetName().c_str(), message.c_str()); // send passive report to gm
+            sWorld->SendGMText(17000, playerName, message); // send report to GMs
             ChatHandler(player->GetSession()).PSendSysMessage("Your message contains a forbidden phrase.");
         }
 
@@ -207,7 +288,7 @@ void WorldChat::SendWorldChat(Player* player, std::string message)
 
         if (URLMute > 0)
         {
-            sWorld->SendGMText(17001, player->GetName().c_str(), message.c_str()); // send passive report to gm
+            sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
             ChatHandler(player->GetSession()).PSendSysMessage("Urls are not allowed. You have been muted for %us.", URLMute);
             LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME); // << ?
             int64 muteTime = time(NULL) + URLMute; // muted player
@@ -216,16 +297,14 @@ void WorldChat::SendWorldChat(Player* player, std::string message)
         }
         else
         {
-            sWorld->SendGMText(17001, player->GetName().c_str(), message.c_str()); // send passive report to gm
+            sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
             ChatHandler(player->GetSession()).PSendSysMessage("Urls are not allowed.");
         }
 
         return;
     }
 
-    std::string msg;
-    std::ostringstream chat_string;
-    if (player->GetTotalPlayedTime() <= sWorldChat->MinPlayTime && player->GetSession()->GetSecurity() == 0) // New If - Played Time Need For Use This Cmd
+    if (player->GetTotalPlayedTime() <= sWorldChat->MinPlayTime && player->GetSession()->GetSecurity() == 0)
     {
         std::string adStr = secsToTimeString(sWorldChat->MinPlayTime - player->GetTotalPlayedTime());
         std::string minTime = secsToTimeString(sWorldChat->MinPlayTime);
@@ -233,59 +312,21 @@ void WorldChat::SendWorldChat(Player* player, std::string message)
         return;
     }
 
-    switch (player->GetSession()->GetSecurity())
-    {
-        case 0:
-            msg += "|cffffd500[";
-            msg += sWorldChat->ChannelName;
-            msg += "] ";
-            msg += GetNameLink(player);
-            msg += ":|cffededed";
-            break;
-        case 1:
-            msg += "|cffffd500[";
-            msg += sWorldChat->ChannelName;
-            msg += "] ";
-            msg += "|TINTERFACE/CHATFRAME/UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
-            msg += "|Hplayer:" + player->GetName() + "|h" + "|cff091fe0[" + player->GetName() + "|cff091fe0]|h|r";
-            msg += ":|cffededed";
-            break;
-        case 2:
-            msg += "|cffffd500[";
-            msg += sWorldChat->ChannelName;
-            msg += "] ";
-            msg += "|TINTERFACE/CHATFRAME/UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
-            msg += "|Hplayer:" + player->GetName() + "|h" + "|cff091fe0[" + player->GetName() + "|cff091fe0]|h|r";
-            msg += ":|cffededed";
-            break;
-        case 3:
-            msg += "|cffffd500[";
-            msg += sWorldChat->ChannelName;
-            msg += "] ";
-            msg += "|TINTERFACE/CHATFRAME/UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
-            msg += "|Hplayer:" + player->GetName() + "|h" + "|cffff0000[" + player->GetName() + "|cffff0000]|h|r";
-            msg += ":|cffededed";
-            break;
-        default:
-            msg += "|cffffd500[";
-            msg += sWorldChat->ChannelName;
-            msg += "] ";
-            msg += GetNameLink(player);
-            msg += ":|cffededed";
-            break;
-    }
-    chat_string << msg << " " << message;
+    std::string chatMessage = BuildChatMessage(chatPrefix, nameLink, chatContent);
 
     SessionMap sessions = sWorld->GetAllSessions();
-
     for (SessionMap::iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
     {
         if (!itr->second)
+        {
             continue;
+        }
+
         if (!itr->second->GetPlayer())
         {
             continue;
         }
+
         if (!itr->second->GetPlayer()->IsInWorld())
         {
             continue;
@@ -298,7 +339,7 @@ void WorldChat::SendWorldChat(Player* player, std::string message)
         {
             if (!sWorldChat->FactionSpecific || (player->GetTeamId() == target->GetTeamId()))
             {
-                sWorld->SendServerMessage(SERVER_MSG_STRING, chat_string.str().c_str(), target);
+                sWorld->SendServerMessage(SERVER_MSG_STRING, chatMessage.c_str(), target);
                 sWorldChat->WorldChatMap[player->GetGUID().GetCounter()].last_msg = GameTime::GetGameTime().count();
             }
         }
