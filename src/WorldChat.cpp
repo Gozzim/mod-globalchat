@@ -20,18 +20,18 @@ void WorldChat::LoadConfig(bool /*reload*/)
     FactionSpecific = sConfigMgr->GetOption<bool>("WorldChat.FactionSpecific", false);
     EnableOnLogin = sConfigMgr->GetOption<bool>("WorldChat.OnFirstLogin", true);
     MinPlayTime = sConfigMgr->GetOption<uint32>("WorldChat.PlayTimeToChat", 300);
-    SwearMute = sConfigMgr->GetOption<uint32>("WorldChat.Swearing.MuteTime", 30);
+    ProfanityMute = sConfigMgr->GetOption<uint32>("WorldChat.Profanity.MuteTime", 30);
     URLMute = sConfigMgr->GetOption<uint32>("WorldChat.URL.MuteTime", 120);
     CoolDown = sConfigMgr->GetOption<uint32>("WorldChat.CoolDown", 2);
     JoinChannelAllowed = sConfigMgr->GetOption<bool>("WorldChat.JoinChannelAllowed", false);
 
-    std::string configSwear = sConfigMgr->GetOption<std::string>("WorldChat.Swearing.Blacklist", "");
-    SwearBlacklist.clear();
-    std::string phrase;
-    std::istringstream swearPhrases(configSwear);
-    while (std::getline(swearPhrases, phrase, ';'))
+    std::string configProfanity = sConfigMgr->GetOption<std::string>("WorldChat.Profanity.Blacklist", "");
+    ProfanityBlacklist.clear();
+    std::string profanity;
+    std::istringstream ProfanityPhrases(configProfanity);
+    while (std::getline(ProfanityPhrases, profanity, ';'))
     {
-        SwearBlacklist.push_back(phrase);
+        ProfanityBlacklist.push_back(profanity);
     }
 
     std::string configUrl = sConfigMgr->GetOption<std::string>("WorldChat.URL.Whitelist", "");
@@ -46,7 +46,7 @@ void WorldChat::LoadConfig(bool /*reload*/)
 
 bool WorldChat::HasForbiddenPhrase(std::string message)
 {
-    for (const auto& phrase: SwearBlacklist)
+    for (const auto& phrase: ProfanityBlacklist)
     {
         if (message.find(phrase) != std::string::npos)
         {
@@ -171,9 +171,9 @@ void WorldChat::SendWorldChat(Player* player, std::string message)
         if (HasForbiddenPhrase(message))
         {
             sWorld->SendGMText(17000, player->GetName().c_str(), message.c_str()); // send passive report to gm
-            ChatHandler(player->GetSession()).PSendSysMessage("Your message contains a forbidden phrase. You have been muted for %us.", SwearMute);
+            ChatHandler(player->GetSession()).PSendSysMessage("Your message contains a forbidden phrase. You have been muted for %us.", ProfanityMute);
             LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME); // << ?
-            int64 muteTime = time(NULL) + sWorldChat->SwearMute; // muted player
+            int64 muteTime = time(NULL) + sWorldChat->ProfanityMute; // muted player
             player->GetSession()->m_muteTime = muteTime; // << ?
             mt->SetData(0, muteTime); // << ?
             return;

@@ -52,25 +52,26 @@ WorldChat.OnFirstLogin = 1
 WorldChat.PlayTimeToChat = 300
 
 #
-#    WorldChat.Swearing.MuteTime
-#        Description: MuteTime if player starts using banned phrases
+#    WorldChat.Profanity.MuteTime
+#        Description: MuteTime when player uses profanities or banned phrases
 #        Default:     30  - (seconds)
 #                     0   - (disabled)
 #
 
-WorldChat.Swearing.MuteTime = 30
+WorldChat.Profanity.MuteTime = 30
 
 #
-#    WorldChat.Swearing.Blacklist
+#    WorldChat.Profanity.Blacklist
 #        Description: Blacklisted phrases separated by Semicolons (;)
-#        Default:     "hello;bye;see you;"
+#           Example:  "hello;bye;see you;"
+#        Default:     "" (Disabled)
 #
 
-WorldChat.Swearing.Blacklist = ""
+WorldChat.Profanity.Blacklist = ""
 
 #
 #    WorldChat.URL.MuteTime (EXPERIMENTAL - Identification not perfect)
-#        Description: MuteTime if player starts using URLs
+#        Description: MuteTime when player posts URLs
 #        Default:     120 - (seconds)
 #                     0   - (disabled)
 #
