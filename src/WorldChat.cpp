@@ -15,18 +15,69 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "WorldSession.h"
 #include "Channel.h"
+#include "Config.h"
+#include "DatabaseEnv.h"
 #include "GameTime.h"
 #include "World.h"
-#include "DatabaseEnv.h"
-#include "Config.h"
 #include "WorldChat.h"
+#include "WorldSession.h"
 
 WorldChat* WorldChat::instance()
 {
     static WorldChat instance;
     return &instance;
+}
+
+void WorldChat::LoadConfig(bool reload)
+{
+    WorldChatEnabled = sConfigMgr->GetOption<bool>("WorldChat.Enable", true);
+    Announce = sConfigMgr->GetOption<bool>("WorldChat.Announce", true);
+    ChatName = sConfigMgr->GetOption<std::string>("WorldChat.Chat.Name", "World");
+    ChatNameColor = sConfigMgr->GetOption<std::string>("WorldChat.Chat.NameColor", "FFFF00");
+    ChatTextColor = sConfigMgr->GetOption<std::string>("WorldChat.Chat.TextColor", "");
+    FactionSpecific = sConfigMgr->GetOption<bool>("WorldChat.FactionSpecific", false);
+    EnableOnLogin = sConfigMgr->GetOption<bool>("WorldChat.OnFirstLogin", true);
+    MinPlayTime = sConfigMgr->GetOption<uint32>("WorldChat.PlayTimeToChat", 300);
+    BlockProfanities = sConfigMgr->GetOption<int>("WorldChat.Profanity.Block", 0);
+    ProfanityMute = sConfigMgr->GetOption<uint32>("WorldChat.Profanity.MuteTime", 30);
+    BlockURLs = sConfigMgr->GetOption<int>("WorldChat.URL.Block", 0);
+    URLMute = sConfigMgr->GetOption<uint32>("WorldChat.URL.MuteTime", 120);
+    CoolDown = sConfigMgr->GetOption<uint32>("WorldChat.CoolDown", 2);
+    JoinChannelAllowed = sConfigMgr->GetOption<bool>("WorldChat.JoinChannelAllowed", false);
+
+    if (reload)
+    {
+        GMColors.clear();
+        ProfanityBlacklist.clear();
+        URLWhitelist.clear();
+    }
+
+    std::string configColors = sConfigMgr->GetOption<std::string>("WorldChat.GM.Colors", "00FF00;091FE0;FF0000");
+    // Do not remove this
+    GMColors.push_back("808080");
+    std::string color;
+    std::istringstream colors(configColors);
+    while (std::getline(colors, color, ';'))
+    {
+        GMColors.push_back(color);
+    }
+
+    std::string configProfanity = sConfigMgr->GetOption<std::string>("WorldChat.Profanity.Blacklist", "");
+    std::string profanity;
+    std::istringstream ProfanityPhrases(configProfanity);
+    while (std::getline(ProfanityPhrases, profanity, ';'))
+    {
+        ProfanityBlacklist.push_back(profanity);
+    }
+
+    std::string configUrl = sConfigMgr->GetOption<std::string>("WorldChat.URL.Whitelist", "");
+    std::string url;
+    std::istringstream urls(configUrl);
+    while (std::getline(urls, url, ';'))
+    {
+        URLWhitelist.push_back(url);
+    }
 }
 
 bool WorldChat::HasForbiddenPhrase(std::string message)
@@ -187,9 +238,7 @@ std::string WorldChat::BuildChatMessage(std::string prefix, std::string nameLink
 void WorldChat::SendWorldChat(Player* player, const char* message)
 {
     if (!player)
-    {
         return;
-    }
 
     uint64 guid = player->GetGUID().GetCounter();
     const char* playerName = player->GetName().c_str();

@@ -42,14 +42,13 @@ public:
         return commandTable;
     }
 
-    static bool HandleWorldChatCommand(ChatHandler* handler, char const* args)
+    static bool HandleWorldChatCommand(ChatHandler* handler, Tail message)
     {
-        if (!*args)
-        {
+        if (message.empty())
             return false;
-        }
+
         Player* player = handler->GetSession()->GetPlayer();
-        sWorldChat->SendWorldChat(player, args);
+        sWorldChat->SendWorldChat(player, message.data());
         return true;
     }
 
