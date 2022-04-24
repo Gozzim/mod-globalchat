@@ -101,7 +101,7 @@ WorldChat.GM.Colors = "00FF00;091FE0;FF0000"
 #                     1  - (Players + Moderators)
 #                     2  - (Players + Moderators + GMs)
 #                     3  - (Players + Moderators + GMs + Admins)
-#                     -1 - (Disabled)
+#                    -1  - (Disabled)
 #
 
 WorldChat.Profanity.Block = 0

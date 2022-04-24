@@ -17,6 +17,14 @@ Advanced WorldChat with detailed options to configure individually
 - Support for custom GM ranks
 - And many more options
 
+## Commands
+- `.chat` or `.world` - Write a message in the WorldChat
+- `.enableworld` - Enables the WorldChat
+- `.disableworld` - Disables the WorldChat (GMs can still send messages)
+- `.joinworld` - Join the WorldChat
+- `.leaveworld` - Leave the WorldChat
+- `/join <WorldChatName>` - Join the WorldChat like a normal Channel (Name configured in conf file)
+
 ## Installation
 ```
 1) Simply place the module under the `modules` directory of your AzerothCore source. 
