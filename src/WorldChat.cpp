@@ -62,6 +62,8 @@ void WorldChat::LoadConfig(bool reload)
     {
         GMColors.push_back(color);
     }
+    // Do not remove this
+    GMColors.push_back("000000");
 
     std::string configProfanity = sConfigMgr->GetOption<std::string>("WorldChat.Profanity.Blacklist", "");
     std::string profanity;
@@ -127,13 +129,21 @@ std::string WorldChat::GetChatPrefix()
 
 std::string WorldChat::GetNameLink(Player* player)
 {
+    std::ostringstream nameLink;
+
+    if (!player)
+    {
+        nameLink << "|cff000000[Console]";
+        nameLink << (ChatTextColor.empty() ? "|cffFFFFFF" : "|cff" + ChatTextColor);
+        return nameLink.str();
+    }
+
     std::string playerName = player->GetName();
     AccountTypes playerSecurity = player->GetSession()->GetSecurity();
 
     const char* classIcon;
     std::string color;
     std::string icons;
-    std::ostringstream nameLink;
 
     switch (player->getClass())
     {
@@ -209,6 +219,7 @@ std::string WorldChat::BuildChatContent(const char* text)
     std::string content = text;
     std::string color = ChatTextColor.empty() ? "|cffFFFFFF" : "|cff" + ChatTextColor;
 
+    // Find and replace any resets of the color (e.g. from linking an Item) and set the color to ChatTextColor
     if (content.find("|H") != std::string::npos && content.find("|h") != std::string::npos && content.find("|cff") != std::string::npos)
     {
         size_t pos = 0;
@@ -223,120 +234,8 @@ std::string WorldChat::BuildChatContent(const char* text)
     return content;
 }
 
-std::string WorldChat::BuildChatMessage(std::string prefix, std::string nameLink, std::string content)
+void WorldChat::SendToPlayers(std::string chatMessage, TeamId teamId)
 {
-    std::ostringstream chat_stream;
-    std::string color = ChatTextColor.empty() ? "FFFFFF" : ChatTextColor;
-
-    chat_stream << prefix << " " << nameLink;
-    chat_stream << "|cff" << color;
-    chat_stream << ": " << content;
-
-    return chat_stream.str();
-}
-
-void WorldChat::SendWorldChat(Player* player, const char* message)
-{
-    if (!player)
-        return;
-
-    uint64 guid = player->GetGUID().GetCounter();
-    const char* playerName = player->GetName().c_str();
-    AccountTypes playerSecurity = player->GetSession()->GetSecurity();
-    std::string chatPrefix = GetChatPrefix();
-    std::string nameLink = GetNameLink(player);
-    std::string chatContent = BuildChatContent(message);
-
-    if (playerSecurity == 0 && !WorldChatEnabled)
-    {
-        ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000World Chat is currently disabled.|r");
-        return;
-    }
-
-    if (!player->CanSpeak())
-    {
-        ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000You can't use the World Chat while muted.|r");
-        return;
-    }
-
-    if (!WorldChatMap[guid].enabled)
-    {
-        ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000You have not joined the World Chat. Type |r.joinworld|cffff0000 to join the World Chat.|r");
-        return;
-    }
-
-    if (WorldChatMap[guid].last_msg + CoolDown >= GameTime::GetGameTime().count() && playerSecurity == 0)
-    {
-        return;
-    }
-
-    if (chatContent.empty())
-    {
-        return;
-    }
-
-    if (BlockProfanities >= 0 && playerSecurity <= BlockProfanities && HasForbiddenPhrase(message))
-    {
-        if (playerSecurity > 0)
-        {
-            ChatHandler(player->GetSession()).PSendSysMessage("Your message contains a forbidden phrase.");
-            return;
-        }
-
-        if (ProfanityMute > 0)
-        {
-            sWorld->SendGMText(17000, playerName, message); // send report to GMs
-            ChatHandler(player->GetSession()).PSendSysMessage("Your message contains a forbidden phrase. You have been muted for %us.", ProfanityMute);
-            LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME); // << ?
-            int64 muteTime = time(NULL) + ProfanityMute; // muted player
-            player->GetSession()->m_muteTime = muteTime; // << ?
-            mt->SetData(0, muteTime); // << ?
-        }
-        else
-        {
-            sWorld->SendGMText(17000, playerName, message); // send report to GMs
-            ChatHandler(player->GetSession()).PSendSysMessage("Your message contains a forbidden phrase.");
-        }
-
-        return;
-    }
-
-    if (BlockURLs >= 0 && playerSecurity <= BlockURLs && HasForbiddenURL(message))
-    {
-        if (playerSecurity > 0)
-        {
-            ChatHandler(player->GetSession()).PSendSysMessage("Urls are not allowed.");
-            return;
-        }
-
-        if (URLMute > 0)
-        {
-            sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
-            ChatHandler(player->GetSession()).PSendSysMessage("Urls are not allowed. You have been muted for %us.", URLMute);
-            LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME); // << ?
-            int64 muteTime = time(NULL) + URLMute; // muted player
-            player->GetSession()->m_muteTime = muteTime; // << ?
-            mt->SetData(0, muteTime); // << ?
-        }
-        else
-        {
-            sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
-            ChatHandler(player->GetSession()).PSendSysMessage("Urls are not allowed.");
-        }
-
-        return;
-    }
-
-    if (player->GetTotalPlayedTime() <= MinPlayTime && player->GetSession()->GetSecurity() == 0)
-    {
-        std::string adStr = secsToTimeString(MinPlayTime - player->GetTotalPlayedTime());
-        std::string minTime = secsToTimeString(MinPlayTime);
-        player->GetSession()->SendNotification("You must have played at least %s to use the World Chat. %s remaining.", minTime.c_str(), adStr.c_str());
-        return;
-    }
-
-    std::string chatMessage = BuildChatMessage(chatPrefix, nameLink, chatContent);
-
     SessionMap sessions = sWorld->GetAllSessions();
     for (SessionMap::iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
     {
@@ -350,11 +249,140 @@ void WorldChat::SendWorldChat(Player* player, const char* message)
 
         if (WorldChatMap[guid2].enabled == 1)
         {
-            if (!FactionSpecific || (player->GetTeamId() == target->GetTeamId()))
+            if (!FactionSpecific || teamId == TEAM_NEUTRAL || teamId == target->GetTeamId())
             {
                 sWorld->SendServerMessage(SERVER_MSG_STRING, chatMessage.c_str(), target);
-                WorldChatMap[player->GetGUID().GetCounter()].last_msg = GameTime::GetGameTime().count();
             }
         }
     }
+}
+
+void WorldChat::SendWorldChat(WorldSession* session, const char* message)
+{
+    Player* player;
+
+    std::string nameLink;
+    std::string chatPrefix = GetChatPrefix();
+    std::string chatContent = BuildChatContent(message);
+    std::string chatMessage;
+
+    std::string chatColor = ChatTextColor.empty() ? "FFFFFF" : ChatTextColor;
+    std::ostringstream chat_stream;
+
+    if (!session)
+    {
+        nameLink = GetNameLink(nullptr);
+        chat_stream << chatPrefix << " " << nameLink;
+        chat_stream << "|cff" << chatColor;
+        chat_stream << ": " << chatContent;
+
+        SendToPlayers(chat_stream.str());
+        return;
+    }
+
+    player = session->GetPlayer();
+    nameLink = GetNameLink(player);
+
+    uint64 guid = player->GetGUID().GetCounter();
+    const char* playerName = player->GetName().c_str();
+    AccountTypes playerSecurity = session->GetSecurity();
+
+    // Prevent Spamming first to avoid sending massive amounts of SysMessages as well
+    if (WorldChatMap[guid].last_msg + CoolDown >= GameTime::GetGameTime().count() && playerSecurity == 0)
+    {
+        return;
+    }
+
+    if (playerSecurity == 0 && !WorldChatEnabled)
+    {
+        ChatHandler(session).PSendSysMessage("|cffff0000WorldChat is currently disabled.|r");
+        return;
+    }
+
+    if (!player->CanSpeak())
+    {
+        ChatHandler(session).PSendSysMessage("|cffff0000You can't use the WorldChat while muted.|r");
+        return;
+    }
+
+    if (!WorldChatMap[guid].enabled)
+    {
+        ChatHandler(session).PSendSysMessage("|cffff0000You have not joined the WorldChat. Type |r.joinworld|cffff0000 to join the WorldChat.|r");
+        return;
+    }
+
+    if (chatContent.empty())
+    {
+        ChatHandler(session).PSendSysMessage("Your message cannot be empty.");
+        return;
+    }
+
+    if (BlockProfanities >= 0 && playerSecurity <= BlockProfanities && HasForbiddenPhrase(message))
+    {
+        if (playerSecurity > 0)
+        {
+            ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase.");
+            return;
+        }
+
+        if (ProfanityMute > 0)
+        {
+            sWorld->SendGMText(17000, playerName, message); // send report to GMs
+            ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase. You have been muted for %us.", ProfanityMute);
+            LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME); // << ?
+            int64 muteTime = time(NULL) + ProfanityMute; // muted player
+            session->m_muteTime = muteTime; // << ?
+            mt->SetData(0, muteTime); // << ?
+        }
+        else
+        {
+            sWorld->SendGMText(17000, playerName, message); // send report to GMs
+            ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase.");
+        }
+
+        return;
+    }
+
+    if (BlockURLs >= 0 && playerSecurity <= BlockURLs && HasForbiddenURL(message))
+    {
+        if (playerSecurity > 0)
+        {
+            ChatHandler(session).PSendSysMessage("Urls are not allowed.");
+            return;
+        }
+
+        if (URLMute > 0)
+        {
+            sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
+            ChatHandler(session).PSendSysMessage("Urls are not allowed. You have been muted for %us.", URLMute);
+            LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME); // << ?
+            int64 muteTime = time(NULL) + URLMute; // muted player
+            session->m_muteTime = muteTime; // << ?
+            mt->SetData(0, muteTime); // << ?
+        }
+        else
+        {
+            sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
+            ChatHandler(session).PSendSysMessage("Urls are not allowed.");
+        }
+
+        return;
+    }
+
+    if (player->GetTotalPlayedTime() <= MinPlayTime && session->GetSecurity() == 0)
+    {
+        std::string adStr = secsToTimeString(MinPlayTime - player->GetTotalPlayedTime());
+        std::string minTime = secsToTimeString(MinPlayTime);
+        session->SendNotification("You must have played at least %s to use the WorldChat. %s remaining.", minTime.c_str(), adStr.c_str());
+        return;
+    }
+
+    // Update last message to avoid sending massive amounts of SysMessages as well
+    WorldChatMap[player->GetGUID().GetCounter()].last_msg = GameTime::GetGameTime().count();
+
+    chat_stream << chatPrefix << " " << nameLink;
+    chat_stream << "|cff" << chatColor;
+    chat_stream << ": " << chatContent;
+
+    SendToPlayers(chat_stream.str(), player->GetTeamId());
 }

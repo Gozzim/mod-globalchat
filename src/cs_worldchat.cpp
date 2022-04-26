@@ -29,14 +29,14 @@ public:
     {
         static ChatCommandTable commandTable =
                 {
-                        { "chat",         HandleWorldChatCommand,     SEC_PLAYER,    Console::No },
-                        { "world",        HandleWorldChatCommand,     SEC_PLAYER,    Console::No },
-                        { "w",            HandleWorldChatCommand,     SEC_PLAYER,    Console::No },
-                        { "c",            HandleWorldChatCommand,     SEC_PLAYER,    Console::No },
-                        { "joinworld",    HandleWorldChatJoinCommand, SEC_PLAYER,    Console::No },
-                        { "leaveworld",   HandleWorldChatLeaveCommand, SEC_PLAYER,    Console::No },
-                        { "disableworld", HandleWorldChatOffCommand,  SEC_MODERATOR, Console::Yes },
-                        { "enableworld",  HandleWorldChatOnCommand,   SEC_MODERATOR, Console::Yes },
+                        { "chat",         HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "world",        HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "w",            HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "c",            HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "joinworld",    HandleWorldChatJoinCommand,    SEC_PLAYER,    Console::No },
+                        { "leaveworld",   HandleWorldChatLeaveCommand,   SEC_PLAYER,    Console::No },
+                        { "disableworld", HandleWorldChatDisableCommand, SEC_MODERATOR, Console::Yes },
+                        { "enableworld",  HandleWorldChatEnableCommand,  SEC_MODERATOR, Console::Yes },
                 };
 
         return commandTable;
@@ -47,12 +47,12 @@ public:
         if (message.empty())
             return false;
 
-        Player* player = handler->GetSession()->GetPlayer();
-        sWorldChat->SendWorldChat(player, message.data());
+        WorldSession* session = handler->GetSession();
+        sWorldChat->SendWorldChat(session, message.data());
         return true;
     }
 
-    static bool HandleWorldChatOnCommand(ChatHandler* handler)
+    static bool HandleWorldChatEnableCommand(ChatHandler* handler)
     {
         Player* player = handler->GetSession()->GetPlayer();
 
@@ -63,12 +63,12 @@ public:
         }
         else
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500The World Chat is already enabled.|r");
+            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500The WorldChat is already enabled.|r");
         }
         return true;
     };
 
-    static bool HandleWorldChatOffCommand(ChatHandler* handler)
+    static bool HandleWorldChatDisableCommand(ChatHandler* handler)
     {
         Player* player = handler->GetSession()->GetPlayer();
 
@@ -79,7 +79,7 @@ public:
         }
         else
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500The World Chat is already disabled.|r");
+            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500The WorldChat is already disabled.|r");
         }
         return true;
     };
@@ -91,19 +91,19 @@ public:
 
         if (!sWorldChat->WorldChatEnabled)
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500The World Chat is currently disabled.|r");
+            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500The WorldChat is currently disabled.|r");
             return true;
         }
 
         if (sWorldChat->WorldChatMap[guid].enabled)
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500You already joined the World Chat.|r");
+            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500You already joined the WorldChat.|r");
             return true;
         }
 
         sWorldChat->WorldChatMap[guid].enabled = 1;
 
-        ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500Joined the World Chat.|r");
+        ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500Joined the WorldChat.|r");
 
         return true;
     };
@@ -115,13 +115,13 @@ public:
 
         if (!sWorldChat->WorldChatMap[guid].enabled)
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500You already left the World Chat.|r");
+            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500You already left the WorldChat.|r");
             return true;
         }
 
         sWorldChat->WorldChatMap[guid].enabled = 0;
 
-        ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500Left the World Chat.|r");
+        ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500Left the WorldChat.|r");
 
         return true;
     };

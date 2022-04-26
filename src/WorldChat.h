@@ -63,13 +63,13 @@ public:
     bool HasForbiddenPhrase(std::string message);
     bool HasForbiddenURL(std::string message);
 
-    void SendWorldChat(Player* player, const char* message);
+    void SendWorldChat(WorldSession* session, const char* message);
 
 private:
     std::string GetChatPrefix();
     std::string GetNameLink(Player* player);
     std::string BuildChatContent(const char* text);
-    std::string BuildChatMessage(std::string prefix, std::string nameLink, std::string content);
+    void SendToPlayers(std::string chatMessage, TeamId teamId = TEAM_NEUTRAL);
 };
 
 #define sWorldChat WorldChat::instance()

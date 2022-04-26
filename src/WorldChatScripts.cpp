@@ -55,7 +55,7 @@ public:
     {
         if (sWorldChat->JoinChannelAllowed && sWorldChat->ChatName != "" && lang != LANG_ADDON && !strcmp(channel->GetName().c_str(), sWorldChat->ChatName.c_str()))
         {
-            sWorldChat->SendWorldChat(player, msg.c_str());
+            sWorldChat->SendWorldChat(player->GetSession(), msg.c_str());
             msg = -1;
         }
     }
