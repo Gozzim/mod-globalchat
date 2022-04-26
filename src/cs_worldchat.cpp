@@ -57,33 +57,40 @@ public:
 
     static bool HandleWorldChatEnableCommand(ChatHandler* handler)
     {
-        Player* player = handler->GetSession()->GetPlayer();
+        std::string playerName = "Console";
 
-        if (!sWorldChat->WorldChatEnabled)
+        if (handler->GetSession())
         {
-            sWorldChat->WorldChatEnabled = true;
-            sWorld->SendGMText(17002, player->GetName().c_str(), "enabled");
+            playerName = handler->GetSession()->GetPlayer()->GetName();
         }
-        else
+
+        if (sWorldChat->WorldChatEnabled)
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500The WorldChat is already enabled.|r");
+            handler->PSendSysMessage("|cffffd500The WorldChat is already enabled.|r");
+            return false;
         }
+
+        sWorldChat->WorldChatEnabled = true;
+        sWorld->SendWorldText(17002, playerName.c_str(), "enabled");
         return true;
     };
 
     static bool HandleWorldChatDisableCommand(ChatHandler* handler)
     {
-        Player* player = handler->GetSession()->GetPlayer();
+        std::string playerName = "Console";
+        if (handler->GetSession())
+        {
+            playerName = handler->GetSession()->GetPlayer()->GetName();
+        }
 
-        if (sWorldChat->WorldChatEnabled)
+        if (!sWorldChat->WorldChatEnabled)
         {
-            sWorldChat->WorldChatEnabled = false;
-            sWorld->SendGMText(17002, player->GetName().c_str(), "disabled");
+            handler->PSendSysMessage("|cffffd500The WorldChat is already disabled.|r");
+            return false;
         }
-        else
-        {
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500The WorldChat is already disabled.|r");
-        }
+
+        sWorldChat->WorldChatEnabled = false;
+        sWorld->SendWorldText(17002, playerName.c_str(), "disabled");
         return true;
     };
 
@@ -94,20 +101,19 @@ public:
 
         if (!sWorldChat->WorldChatEnabled)
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500The WorldChat is currently disabled.|r");
+            handler->PSendSysMessage("|cffffd500The WorldChat is currently disabled.|r");
             return true;
         }
 
         if (sWorldChat->WorldChatMap[guid].enabled)
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500You already joined the WorldChat.|r");
+            handler->PSendSysMessage("|cffffd500You already joined the WorldChat.|r");
             return true;
         }
 
         sWorldChat->WorldChatMap[guid].enabled = 1;
 
-        ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500Joined the WorldChat.|r");
-
+        handler->PSendSysMessage("|cffffd500You have joined the WorldChat.|r");
         return true;
     };
 
@@ -118,26 +124,30 @@ public:
 
         if (!sWorldChat->WorldChatMap[guid].enabled)
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500You already left the WorldChat.|r");
+            handler->PSendSysMessage("|cffffd500You already left the WorldChat.|r");
             return true;
         }
 
         sWorldChat->WorldChatMap[guid].enabled = 0;
 
-        ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500Left the WorldChat.|r");
+        handler->PSendSysMessage("|cffffd500You have left the WorldChat.|r");
 
         return true;
     };
 
     static bool HandleMuteWorldChat(ChatHandler* handler, PlayerIdentifier player, std::string duration, Tail muteReason)
     {
+        std::string playerName = "Console";
         Player* target = player.GetConnectedPlayer();
 
         if (!target || duration.empty())
             return false;
 
-        if (handler->GetSession()->GetSecurity() <= target->GetSession()->GetSecurity())
+        if (handler->GetSession() && handler->GetSession()->GetSecurity() <= target->GetSession()->GetSecurity())
             return false;
+
+        if (handler->GetSession())
+            playerName = handler->GetSession()->GetPlayer()->GetName();
 
         std::string muteReasonStr{ muteReason };
         uint64 guid = target->GetGUID().GetCounter();
@@ -147,12 +157,12 @@ public:
             sWorldChat->WorldChatMap[guid].banned = true;
             if (sWorldChat->AnnounceMutes)
             {
-                handler->PSendSysMessage(17004, target->GetName(), muteReasonStr);
+                sWorld->SendWorldText(17004, playerName.c_str(), target->GetName().c_str(), muteReasonStr.c_str());
             }
             else
             {
                 ChatHandler(target->GetSession()).PSendSysMessage(17006, muteReasonStr.c_str());
-                sWorld->SendGMText(17004, target->GetName().c_str(), muteReasonStr.c_str());
+                sWorld->SendGMText(17004, playerName.c_str(), target->GetName().c_str(), muteReasonStr.c_str());
             }
 
             return true;
@@ -163,12 +173,12 @@ public:
         sWorldChat->WorldChatMap[guid].mute_time = muteTime;
         if (sWorldChat->AnnounceMutes)
         {
-            handler->PSendSysMessage(17003, target->GetName(), secsToTimeString(durationSecs, true), muteReasonStr);
+            sWorld->SendWorldText(17003, playerName.c_str(), target->GetName().c_str(), secsToTimeString(durationSecs, true).c_str(), muteReasonStr.c_str());
         }
         else
         {
             ChatHandler(target->GetSession()).PSendSysMessage(17005, secsToTimeString(durationSecs, true).c_str(), muteReasonStr.c_str());
-            sWorld->SendGMText(17003, target->GetName().c_str(), secsToTimeString(durationSecs, true).c_str(), muteReasonStr.c_str());
+            sWorld->SendGMText(17003, playerName.c_str(), target->GetName().c_str(), secsToTimeString(durationSecs, true).c_str(), muteReasonStr.c_str());
         }
 
         return true;
