@@ -86,6 +86,15 @@ WorldChat.CoolDown = 2
 WorldChat.JoinChannelAllowed = 0
 
 #
+#    WorldChat.AnnounceMutes
+#        Description: Enables announcements of WorldChat mutes executed by GM Commands
+#        Default:     0	- (Disabled)
+#                     1	- (Enabled)
+#
+
+WorldChat.AnnounceMutes = 0
+
+#
 #    WorldChat.GM.Colors
 #        Description: Colors for names of GMs in WorldChat. Ordered by Rank, starting at 1.
 #        Default:     "00FF00;091FE0;FF0000"

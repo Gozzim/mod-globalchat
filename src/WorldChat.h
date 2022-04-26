@@ -29,6 +29,7 @@ typedef struct
     bool enabled;
     time_t last_msg;
     time_t mute_time;
+    bool banned;
 } WorldChatVars;
 
 class WorldChat
@@ -44,14 +45,15 @@ public:
     bool FactionSpecific;
     bool EnableOnLogin;
     uint32 MinPlayTime;
+    uint32 CoolDown;
+    bool JoinChannel;
+    bool AnnounceMutes;
     int BlockProfanities;
     uint32 ProfanityMuteType;
     uint32 ProfanityMute;
     int BlockURLs;
     uint32 URLMuteType;
     uint32 URLMute;
-    uint32 CoolDown;
-    bool JoinChannelAllowed;
 
     const std::regex urlRegex = std::regex{ "((http|ftp)s?://)?([\\w]*(?::[\\w]*)?@)?((?:(www\\.)?(?:[a-zA-Z0-9-\\.]{1,256}\\.[a-zA-Z]{2,63}))|(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(:\\d+)?(/[\\w\\.()-/\\\\]*)?((\\?([^#\\s&]+=[^#\\s&]+)(?:&([^#\\s&]+=[^#\\s&]+))*)?(#\\S*)?)?" };
 
@@ -65,6 +67,8 @@ public:
 
     bool HasForbiddenPhrase(std::string message);
     bool HasForbiddenURL(std::string message);
+
+    void MutePlayer(Player* player, int64 seconds, bool global = false);
 
     void SendWorldChat(WorldSession* session, const char* message);
 

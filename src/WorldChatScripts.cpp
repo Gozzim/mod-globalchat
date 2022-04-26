@@ -53,7 +53,7 @@ public:
 
     void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Channel* channel)
     {
-        if (sWorldChat->JoinChannelAllowed && sWorldChat->ChatName != "" && lang != LANG_ADDON && !strcmp(channel->GetName().c_str(), sWorldChat->ChatName.c_str()))
+        if (sWorldChat->JoinChannel && sWorldChat->ChatName != "" && lang != LANG_ADDON && !strcmp(channel->GetName().c_str(), sWorldChat->ChatName.c_str()))
         {
             sWorldChat->SendWorldChat(player->GetSession(), msg.c_str());
             msg = -1;

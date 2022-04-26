@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "GameTime.h"
 #include "ScriptMgr.h"
 #include "WorldChat.h"
 
@@ -37,6 +38,8 @@ public:
                         { "leaveworld",   HandleWorldChatLeaveCommand,   SEC_PLAYER,    Console::No },
                         { "disableworld", HandleWorldChatDisableCommand, SEC_MODERATOR, Console::Yes },
                         { "enableworld",  HandleWorldChatEnableCommand,  SEC_MODERATOR, Console::Yes },
+                        { "muteworld",    HandleMuteWorldChat,           SEC_MODERATOR, Console::Yes },
+                        { "unmuteworld",  HandleUnmuteWorldChat,         SEC_MODERATOR, Console::Yes },
                 };
 
         return commandTable;
@@ -123,6 +126,64 @@ public:
 
         ChatHandler(player->GetSession()).PSendSysMessage("|cffffd500Left the WorldChat.|r");
 
+        return true;
+    };
+
+    static bool HandleMuteWorldChat(ChatHandler* handler, PlayerIdentifier player, std::string duration, Tail muteReason)
+    {
+        Player* target = player.GetConnectedPlayer();
+
+        if (!target || duration.empty())
+            return false;
+
+        if (handler->GetSession()->GetSecurity() <= target->GetSession()->GetSecurity())
+            return false;
+
+        std::string muteReasonStr{ muteReason };
+        uint64 guid = target->GetGUID().GetCounter();
+
+        if (atoi(duration.c_str()) < 0)
+        {
+            sWorldChat->WorldChatMap[guid].banned = true;
+            if (sWorldChat->AnnounceMutes)
+            {
+                handler->PSendSysMessage(17004, target->GetName(), muteReasonStr);
+            }
+            else
+            {
+                ChatHandler(target->GetSession()).PSendSysMessage(17006, muteReasonStr.c_str());
+                sWorld->SendGMText(17004, target->GetName().c_str(), muteReasonStr.c_str());
+            }
+
+            return true;
+        }
+
+        uint32 durationSecs = TimeStringToSecs(duration);
+        int64 muteTime = GameTime::GetGameTime().count() + durationSecs;
+        sWorldChat->WorldChatMap[guid].mute_time = muteTime;
+        if (sWorldChat->AnnounceMutes)
+        {
+            handler->PSendSysMessage(17003, target->GetName(), secsToTimeString(durationSecs, true), muteReasonStr);
+        }
+        else
+        {
+            ChatHandler(target->GetSession()).PSendSysMessage(17005, secsToTimeString(durationSecs, true).c_str(), muteReasonStr.c_str());
+            sWorld->SendGMText(17003, target->GetName().c_str(), secsToTimeString(durationSecs, true).c_str(), muteReasonStr.c_str());
+        }
+
+        return true;
+    };
+
+    static bool HandleUnmuteWorldChat(ChatHandler* /*handler*/, PlayerIdentifier player)
+    {
+        Player* target = player.GetConnectedPlayer();
+
+        if (!target)
+            return false;
+
+        uint64 guid = target->GetGUID().GetCounter();
+        sWorldChat->WorldChatMap[guid].banned = false;
+        sWorldChat->WorldChatMap[guid].mute_time = 0;
         return true;
     };
 };
