@@ -119,9 +119,17 @@ std::string WorldChat::GetChatPrefix()
 
     if (!ChatName.empty())
     {
-        chatPrefix << "|cff";
-        chatPrefix << (ChatNameColor.empty() ? "FFFF00" : ChatNameColor);
-        chatPrefix << "[" << ChatName << "]|r";
+        chatPrefix << "|Hchannel:";
+        if (JoinChannelAllowed)
+        {
+            chatPrefix << "c " << ChatName;
+        }
+        else
+        {
+            chatPrefix << "s .w ";
+        }
+        chatPrefix << "|h|cff" << (ChatNameColor.empty() ? "FFFF00" : ChatNameColor);
+        chatPrefix << "[" << ChatName << "]|h|r";
     }
 
     return chatPrefix.str();
