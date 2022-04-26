@@ -28,6 +28,7 @@ typedef struct
 {
     bool enabled;
     time_t last_msg;
+    time_t mute_time;
 } WorldChatVars;
 
 class WorldChat
@@ -44,8 +45,10 @@ public:
     bool EnableOnLogin;
     uint32 MinPlayTime;
     int BlockProfanities;
+    uint32 ProfanityMuteType;
     uint32 ProfanityMute;
     int BlockURLs;
+    uint32 URLMuteType;
     uint32 URLMute;
     uint32 CoolDown;
     bool JoinChannelAllowed;

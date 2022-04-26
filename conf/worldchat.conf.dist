@@ -107,6 +107,16 @@ WorldChat.GM.Colors = "00FF00;091FE0;FF0000"
 WorldChat.Profanity.Block = 0
 
 #
+#    WorldChat.Profanity.MuteType
+#        Description: The scale on which players get muted when using profanities.
+#        Default:     1  - (WorldChat only)
+#                     2  - (WorldChat + Global)
+#                     0  - (Disabled)
+#
+
+WorldChat.Profanity.BlockType = 1
+
+#
 #    WorldChat.Profanity.MuteTime
 #        Description: MuteTime when player uses profanities or banned phrases.
 #        Default:     30 - (seconds)
@@ -135,6 +145,16 @@ WorldChat.Profanity.Blacklist = ""
 #
 
 WorldChat.URL.Block = 0
+
+#
+#    WorldChat.URL.MuteType
+#        Description: The scale on which players get muted when using URLs.
+#        Default:     1  - (WorldChat only)
+#                     2  - (WorldChat + Global)
+#                     0  - (Disabled)
+#
+
+WorldChat.URL.BlockType = 1
 
 #
 #    WorldChat.URL.MuteTime
