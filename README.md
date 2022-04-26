@@ -18,12 +18,18 @@ Advanced WorldChat with detailed options to configure individually
 - And many more options
 
 ## Commands
+
+### Player Commands
 - `.chat` or `.world` - Write a message in the WorldChat
-- `.enableworld` - Enables the WorldChat
-- `.disableworld` - Disables the WorldChat (GMs can still send messages)
 - `.joinworld` - Join the WorldChat
 - `.leaveworld` - Leave the WorldChat
 - `/join <WorldChatName>` - Join the WorldChat like a normal Channel (Name configured in conf file)
+
+### GM Commands
+- `.wenable` - Enables the WorldChat
+- `.wdisable` - Disables the WorldChat (GMs can still send messages)
+- `.wmute` - Mute a player in the WorldChat for a certain amount of time or permanently
+- `.wunmute` - Unmute a player in the WorldChat
 
 ## Installation
 ```

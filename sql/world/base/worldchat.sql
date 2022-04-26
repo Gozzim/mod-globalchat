@@ -17,7 +17,7 @@ INSERT INTO `command` (`name`, `security`, `help`) VALUES
 ('c', 0, 'Syntax: .c $text\r\nWrite a message in the WorldChat.\r\nAdditional commands: .joinworld & .leaveworld'),
 ('joinworld', 0, 'Join the WorldChat.'),
 ('leaveworld', 0, 'Leave the WorldChat.'),
-('enableworld', 1, 'Enables WorldChat.'),
-('disableworld', 1, 'Disables WorldChat.'),
-('muteworld', 1, 'Syntax: $playername $bantime $reason\r\nMutes a player in the WorldChat\r\n$bantime: Negative values lead to perment mute. Otherwise use a timestring like \"1d2h30s\".'),
-('unmuteworld', 1, 'Syntax: $playername\r\nUnmutes player in the WorldChat.');
+('wenable', 1, 'Enables WorldChat.'),
+('wdisable', 1, 'Disables WorldChat.'),
+('wmute', 1, 'Syntax: $playername $bantime $reason\r\nMutes a player in the WorldChat\r\n$bantime: Negative values lead to perment mute. Otherwise use a timestring like \"1d2h30s\".'),
+('wunmute', 1, 'Syntax: $playername\r\nUnmutes player in the WorldChat.');

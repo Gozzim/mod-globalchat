@@ -30,16 +30,16 @@ public:
     {
         static ChatCommandTable commandTable =
                 {
-                        { "chat",         HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
-                        { "world",        HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
-                        { "w",            HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
-                        { "c",            HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
-                        { "joinworld",    HandleWorldChatJoinCommand,    SEC_PLAYER,    Console::No },
-                        { "leaveworld",   HandleWorldChatLeaveCommand,   SEC_PLAYER,    Console::No },
-                        { "disableworld", HandleWorldChatDisableCommand, SEC_MODERATOR, Console::Yes },
-                        { "enableworld",  HandleWorldChatEnableCommand,  SEC_MODERATOR, Console::Yes },
-                        { "muteworld",    HandleMuteWorldChat,           SEC_MODERATOR, Console::Yes },
-                        { "unmuteworld",  HandleUnmuteWorldChat,         SEC_MODERATOR, Console::Yes },
+                        { "chat",       HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "world",      HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "w",          HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "c",          HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "joinworld",  HandleWorldChatJoinCommand,    SEC_PLAYER,    Console::No },
+                        { "leaveworld", HandleWorldChatLeaveCommand,   SEC_PLAYER,    Console::No },
+                        { "wdisable",   HandleWorldChatDisableCommand, SEC_MODERATOR, Console::Yes },
+                        { "wenable",    HandleWorldChatEnableCommand,  SEC_MODERATOR, Console::Yes },
+                        { "wmute",      HandleMuteWorldChat,           SEC_MODERATOR, Console::Yes },
+                        { "wunmute",    HandleUnmuteWorldChat,         SEC_MODERATOR, Console::Yes },
                 };
 
         return commandTable;
