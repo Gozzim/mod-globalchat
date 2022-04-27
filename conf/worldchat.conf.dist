@@ -78,6 +78,26 @@ WorldChat.Player.RaceIcon = 1
 WorldChat.Player.ClassIcon = 0
 
 #
+#    WorldChat.GM.Colors
+#        Description: Colors for names of GMs in WorldChat. Ordered by Rank, starting at 1.
+#        Default:     "00FF00;091FE0;FF0000"
+#                     "" - (Disabled)
+#
+
+WorldChat.GM.Colors = "00FF00;091FE0;FF0000"
+
+#
+#    WorldChat.GM.Badge
+#        Description: Configure when to show the GMChatBadge and GMColors in WorldChat
+#        Default:     1 - (Always)
+#                     2 - (With GM/Dev On)
+#                     3 - (With Normal GMChatBadge On)
+#                     0 - (Never)
+#
+
+WorldChat.GM.Badge = 1
+
+#
 #    WorldChat.FactionSpecific
 #        Description: Enable faction specific WorldChat
 #        Default:     0	- (Disabled)
@@ -130,15 +150,6 @@ WorldChat.JoinChannelAllowed = 0
 #
 
 WorldChat.AnnounceMutes = 0
-
-#
-#    WorldChat.GM.Colors
-#        Description: Colors for names of GMs in WorldChat. Ordered by Rank, starting at 1.
-#        Default:     "00FF00;091FE0;FF0000"
-#                     "" - (Disabled)
-#
-
-WorldChat.GM.Colors = "00FF00;091FE0;FF0000"
 
 #
 #    WorldChat.Profanity.Block

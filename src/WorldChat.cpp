@@ -40,6 +40,7 @@ void WorldChat::LoadConfig(bool reload)
     FactionIcon = sConfigMgr->GetOption<bool>("WorldChat.Player.FactionIcon", false);
     RaceIcon = sConfigMgr->GetOption<bool>("WorldChat.Player.RaceIcon", true);
     ClassIcon = sConfigMgr->GetOption<bool>("WorldChat.Player.ClassIcon", false);
+    GMBadge = sConfigMgr->GetOption<uint32>("WorldChat.GM.Badge", 1);
     FactionSpecific = sConfigMgr->GetOption<bool>("WorldChat.FactionSpecific", false);
     EnableOnLogin = sConfigMgr->GetOption<bool>("WorldChat.OnFirstLogin", true);
     MinPlayTime = sConfigMgr->GetOption<uint32>("WorldChat.PlayTimeToChat", 300);
@@ -361,7 +362,7 @@ std::string WorldChat::GetNameLink(Player* player)
             break;
     }
 
-    if (playerSecurity > 0)
+    if (playerSecurity > 0 && (GMBadge == 1 || (GMBadge == 2 && (player->IsDeveloper() || player->IsGameMaster())) || (GMBadge == 3 && player->isGMChat())))
     {
         icons = "|TINTERFACE\\CHATFRAME\\UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
 

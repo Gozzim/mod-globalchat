@@ -46,6 +46,7 @@ public:
     bool FactionIcon;
     bool RaceIcon;
     bool ClassIcon;
+    uint32 GMBadge;
     bool FactionSpecific;
     bool EnableOnLogin;
     uint32 MinPlayTime;
