@@ -320,8 +320,6 @@ std::string WorldChat::GetChatPrefix()
 
 std::string WorldChat::GetNameLink(Player* player)
 {
-    std::string color;
-    std::string icons;
     std::ostringstream nameLink;
 
     if (!player)
@@ -333,6 +331,9 @@ std::string WorldChat::GetNameLink(Player* player)
 
     std::string playerName = player->GetName();
     AccountTypes playerSecurity = player->GetSession()->GetSecurity();
+
+    std::string color;
+    std::string icons;
 
     if (FactionIcon)
         icons += GetFactionIcon(player);

@@ -10,6 +10,7 @@ Advanced WorldChat with detailed options to configure individually
 
 - Enable/Disable Chat per command
 - Set Chat Name/NameColor/TextColor
+- Configure Class/Race/Faction Icons to your need
 - Spam Protection
 - URL Filters
 - Profanity Filters
