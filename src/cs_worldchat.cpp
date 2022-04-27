@@ -66,7 +66,7 @@ public:
 
         if (sWorldChat->WorldChatEnabled)
         {
-            handler->PSendSysMessage("|cffffd500The WorldChat is already enabled.|r");
+            handler->PSendSysMessage("The WorldChat is already enabled.");
             return false;
         }
 
@@ -85,7 +85,7 @@ public:
 
         if (!sWorldChat->WorldChatEnabled)
         {
-            handler->PSendSysMessage("|cffffd500The WorldChat is already disabled.|r");
+            handler->PSendSysMessage("The WorldChat is already disabled.");
             return false;
         }
 
@@ -101,19 +101,19 @@ public:
 
         if (!sWorldChat->WorldChatEnabled)
         {
-            handler->PSendSysMessage("|cffffd500The WorldChat is currently disabled.|r");
+            handler->PSendSysMessage("The WorldChat is currently disabled.");
             return true;
         }
 
         if (sWorldChat->WorldChatMap[guid].enabled)
         {
-            handler->PSendSysMessage("|cffffd500You already joined the WorldChat.|r");
+            handler->PSendSysMessage("You already joined the WorldChat.");
             return true;
         }
 
         sWorldChat->WorldChatMap[guid].enabled = 1;
 
-        handler->PSendSysMessage("|cffffd500You have joined the WorldChat.|r");
+        handler->PSendSysMessage("You have joined the WorldChat.");
         return true;
     };
 
@@ -124,13 +124,13 @@ public:
 
         if (!sWorldChat->WorldChatMap[guid].enabled)
         {
-            handler->PSendSysMessage("|cffffd500You already left the WorldChat.|r");
+            handler->PSendSysMessage("You already left the WorldChat.");
             return true;
         }
 
         sWorldChat->WorldChatMap[guid].enabled = 0;
 
-        handler->PSendSysMessage("|cffffd500You have left the WorldChat.|r");
+        handler->PSendSysMessage("You have left the WorldChat.");
 
         return true;
     };
