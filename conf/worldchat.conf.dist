@@ -41,6 +41,43 @@ WorldChat.Chat.NameColor = "FFFF00"
 WorldChat.Chat.TextColor = "FFFFFF"
 
 #
+#    WorldChat.Player.NameColor
+#        Description: Color of the PlayerName
+#        Default:     1 - (Class)
+#                     2 - (Faction)
+#                     0 - (Disabled)
+#
+
+WorldChat.Player.NameColor = 1
+
+#
+#    WorldChat.Player.FactionIcon
+#        Description: Enable showing a faction icon in front of the PlayerName
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+#
+
+WorldChat.Player.FactionIcon = 0
+
+#
+#    WorldChat.Player.RaceIcon
+#        Description: Enable showing a race icon in front of the PlayerName
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#
+
+WorldChat.Player.RaceIcon = 1
+
+#
+#    WorldChat.Player.ClassIcon
+#        Description: Enable showing a class icon in front of the PlayerName
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+#
+
+WorldChat.Player.ClassIcon = 0
+
+#
 #    WorldChat.FactionSpecific
 #        Description: Enable faction specific WorldChat
 #        Default:     0	- (Disabled)

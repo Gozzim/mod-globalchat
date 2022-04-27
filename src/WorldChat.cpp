@@ -36,6 +36,10 @@ void WorldChat::LoadConfig(bool reload)
     ChatName = sConfigMgr->GetOption<std::string>("WorldChat.Chat.Name", "World");
     ChatNameColor = sConfigMgr->GetOption<std::string>("WorldChat.Chat.NameColor", "FFFF00");
     ChatTextColor = sConfigMgr->GetOption<std::string>("WorldChat.Chat.TextColor", "");
+    PlayerColor = sConfigMgr->GetOption<uint32>("WorldChat.Player.NameColor", 1);
+    FactionIcon = sConfigMgr->GetOption<bool>("WorldChat.Player.FactionIcon", false);
+    RaceIcon = sConfigMgr->GetOption<bool>("WorldChat.Player.RaceIcon", true);
+    ClassIcon = sConfigMgr->GetOption<bool>("WorldChat.Player.ClassIcon", false);
     FactionSpecific = sConfigMgr->GetOption<bool>("WorldChat.FactionSpecific", false);
     EnableOnLogin = sConfigMgr->GetOption<bool>("WorldChat.OnFirstLogin", true);
     MinPlayTime = sConfigMgr->GetOption<uint32>("WorldChat.PlayTimeToChat", 300);
@@ -107,13 +111,188 @@ bool WorldChat::HasForbiddenURL(std::string message)
     {
         std::smatch match = *i;
 
-        if(!(std::find(URLWhitelist.begin(), URLWhitelist.end(), match[4].str()) != URLWhitelist.end()))
-        {
+        if (!(std::find(URLWhitelist.begin(), URLWhitelist.end(), match[4].str()) != URLWhitelist.end()))
             return true;
-        }
     }
 
     return false;
+}
+
+std::string WorldChat::GetFactionIcon(Player* player)
+{
+    switch (player->GetTeamId())
+    {
+        case TEAM_ALLIANCE:
+            return "|TInterface\\ICONS\\Achievement_PVP_A_A:13:13:0:-3|t";
+        case TEAM_HORDE:
+            return "|TInterface\\ICONS\\Achievement_PVP_H_H:13:13:0:-3|t";
+        default:
+            return "";
+    }
+}
+
+std::string WorldChat::GetFactionColor(Player* player)
+{
+    switch (player->GetTeamId())
+    {
+        case TEAM_ALLIANCE:
+            return "3399FF";
+        case TEAM_HORDE:
+            return "CC0000";
+        default:
+            return "FFFFFF";
+    }
+}
+
+std::string WorldChat::GetClassIcon(Player* player)
+{
+    std::ostringstream icon;
+
+    uint8 iconSize = 32;
+    uint8 row = 0;
+    uint8 column = 0;
+    switch (player->getClass())
+    {
+        case CLASS_WARRIOR:
+            row = 0;
+            column = 0;
+            break;
+        case CLASS_MAGE:
+            row = 0;
+            column = 1;
+            break;
+        case CLASS_ROGUE:
+            row = 0;
+            column = 2;
+            break;
+        case CLASS_DRUID:
+            row = 0;
+            column = 3;
+            break;
+        case CLASS_HUNTER:
+            row = 1;
+            column = 0;
+            break;
+        case CLASS_SHAMAN:
+            row = 1;
+            column = 1;
+            break;
+        case CLASS_PRIEST:
+            row = 1;
+            column = 2;
+            break;
+        case CLASS_WARLOCK:
+            row = 1;
+            column = 3;
+            break;
+        case CLASS_PALADIN:
+            row = 2;
+            column = 0;
+            break;
+        case CLASS_DEATH_KNIGHT:
+            row = 2;
+            column = 1;
+            break;
+    }
+
+    icon << "|TInterface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes:13:13:0:-3:128:128:";
+    icon << column * iconSize << ":" << (column + 1) * iconSize << ":";
+    icon << row * iconSize << ":" << (row + 1) * iconSize << "|t";
+
+    return icon.str();
+}
+
+std::string WorldChat::GetClassColor(Player* player)
+{
+    switch (player->getClass())
+    {
+        case CLASS_DEATH_KNIGHT:
+            return "C41F3B";
+        case CLASS_DRUID:
+            return "FF7D0A";
+        case CLASS_HUNTER:
+            return "ABD473";
+        case CLASS_MAGE:
+            return "69CCF0";
+        case CLASS_PALADIN:
+            return "F58CBA";
+        case CLASS_PRIEST:
+            return "FFFFFF";
+        case CLASS_ROGUE:
+            return "FFF569";
+        case CLASS_SHAMAN:
+            return "0070DE";
+        case CLASS_WARLOCK:
+            return "9482C9";
+        case CLASS_WARRIOR:
+            return "C79C6E";
+        default:
+            return GMColors[0];
+    }
+}
+
+std::string WorldChat::GetRaceIcon(Player* player)
+{
+    std::ostringstream icon;
+
+    uint8 iconSize = 32;
+    uint8 row = 0;
+    uint8 column = 0;
+
+    switch (player->getRace())
+    {
+        case RACE_HUMAN:
+            row = 0;
+            column = 0;
+            break;
+        case RACE_DWARF:
+            row = 0;
+            column = 1;
+            break;
+        case RACE_GNOME:
+            row = 0;
+            column = 2;
+            break;
+        case RACE_NIGHTELF:
+            row = 0;
+            column = 3;
+            break;
+        case RACE_DRAENEI:
+            row = 0;
+            column = 4;
+            break;
+        case RACE_TAUREN:
+            row = 1;
+            column = 0;
+            break;
+        case RACE_UNDEAD_PLAYER:
+            row = 1;
+            column = 1;
+            break;
+        case RACE_TROLL:
+            row = 1;
+            column = 2;
+            break;
+        case RACE_ORC:
+            row = 1;
+            column = 3;
+            break;
+        case RACE_BLOODELF:
+            row = 1;
+            column = 4;
+            break;
+    }
+
+    if (player->getGender() == GENDER_FEMALE)
+    {
+        row += 2;
+    }
+
+    icon << "|TInterface\\Glues\\CharacterCreate\\UI-CharacterCreate-Races:13:13:0:-3:256:128:";
+    icon << column * iconSize << ":" << (column + 1) * iconSize << ":";
+    icon << row * iconSize << ":" << (row + 1) * iconSize << "|t";
+
+    return icon.str();
 }
 
 std::string WorldChat::GetChatPrefix()
@@ -140,6 +319,8 @@ std::string WorldChat::GetChatPrefix()
 
 std::string WorldChat::GetNameLink(Player* player)
 {
+    std::string color;
+    std::string icons;
     std::ostringstream nameLink;
 
     if (!player)
@@ -152,55 +333,31 @@ std::string WorldChat::GetNameLink(Player* player)
     std::string playerName = player->GetName();
     AccountTypes playerSecurity = player->GetSession()->GetSecurity();
 
-    const char* classIcon;
-    std::string color;
-    std::string icons;
-
-    switch (player->getClass())
+    if (FactionIcon)
     {
-        case CLASS_DEATH_KNIGHT:
-            color = "C41F3B";
-            classIcon = "|TInterface\\icons\\Spell_Deathknight_ClassIcon:12:12|t|r";
+        icons += GetFactionIcon(player);
+    }
+
+    if (RaceIcon)
+    {
+        icons += GetRaceIcon(player);
+    }
+
+    if (ClassIcon)
+    {
+        icons += GetClassIcon(player);
+    }
+
+    switch (PlayerColor)
+    {
+        case 1:
+            color = GetClassColor(player);
             break;
-        case CLASS_DRUID:
-            color = "FF7D0A";
-            classIcon = "|TInterface\\icons\\Ability_Druid_Maul:12:12|t|r";
-            break;
-        case CLASS_HUNTER:
-            color = "ABD473";
-            classIcon = "|TInterface\\icons\\INV_Weapon_Bow_07:12:12|t|r";
-            break;
-        case CLASS_MAGE:
-            color = "69CCF0";
-            classIcon = "|TInterface\\icons\\INV_Staff_13:12:12|t|r";
-            break;
-        case CLASS_PALADIN:
-            color = "F58CBA";
-            classIcon = "|TInterface\\icons\\INV_Hammer_01:12:12|t|r";
-            break;
-        case CLASS_PRIEST:
-            color = "FFFFFF";
-            classIcon = "|TInterface\\icons\\INV_Staff_30:12:12|t|r";
-            break;
-        case CLASS_ROGUE:
-            color = "FFF569";
-            classIcon = "|TInterface\\icons\\INV_ThrowingKnife_04:12:12|t|r";
-            break;
-        case CLASS_SHAMAN:
-            color = "0070DE";
-            classIcon = "|TInterface\\icons\\Spell_Nature_BloodLust:12:12|t|r";
-            break;
-        case CLASS_WARLOCK:
-            color = "9482C9";
-            classIcon = "|TInterface\\icons\\Spell_Nature_FaerieFire:12:12|t|r";
-            break;
-        case CLASS_WARRIOR:
-            color = "C79C6E";
-            classIcon = "|TInterface\\icons\\INV_Sword_27.png:15|t|r";
+        case 2:
+            color = GetFactionColor(player);
             break;
         default:
             color = GMColors[0];
-            classIcon = "";
             break;
     }
 
@@ -208,13 +365,9 @@ std::string WorldChat::GetNameLink(Player* player)
     {
         icons = "|TINTERFACE\\CHATFRAME\\UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
 
-        if (playerSecurity < GMColors.size())
+        if (GMColors.size() > 2 && playerSecurity < GMColors.size())
         {
             color = GMColors[playerSecurity];
-        }
-        else
-        {
-            color = GMColors[0];
         }
     }
 

@@ -42,6 +42,10 @@ public:
     std::string ChatName;
     std::string ChatNameColor;
     std::string ChatTextColor;
+    uint32 PlayerColor;
+    bool FactionIcon;
+    bool RaceIcon;
+    bool ClassIcon;
     bool FactionSpecific;
     bool EnableOnLogin;
     uint32 MinPlayTime;
@@ -67,6 +71,12 @@ public:
 
     bool HasForbiddenPhrase(std::string message);
     bool HasForbiddenURL(std::string message);
+
+    std::string GetFactionIcon(Player* player);
+    std::string GetFactionColor(Player* player);
+    std::string GetClassIcon(Player* player);
+    std::string GetClassColor(Player* player);
+    std::string GetRaceIcon(Player* player);
 
     void MutePlayer(Player* player, int64 seconds, bool global = false);
 
