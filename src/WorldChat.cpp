@@ -312,7 +312,7 @@ std::string WorldChat::GetChatPrefix()
             chatPrefix << "s .world ";
         }
         chatPrefix << "|h|cff" << (ChatNameColor.empty() ? "FFFF00" : ChatNameColor);
-        chatPrefix << "[" << ChatName << "]|h|r";
+        chatPrefix << "[" << ChatName << "]|h";
     }
 
     return chatPrefix.str();
@@ -326,8 +326,8 @@ std::string WorldChat::GetNameLink(Player* player)
 
     if (!player)
     {
-        nameLink << "|cff000000[Console]";
-        nameLink << (ChatTextColor.empty() ? "|cffFFFFFF" : "|cff" + ChatTextColor);
+        nameLink << "[|cff000000Console";
+        nameLink << "|cff" << (ChatNameColor.empty() ? "FFFF00" : ChatNameColor) << "]";
         return nameLink.str();
     }
 
@@ -335,19 +335,13 @@ std::string WorldChat::GetNameLink(Player* player)
     AccountTypes playerSecurity = player->GetSession()->GetSecurity();
 
     if (FactionIcon)
-    {
         icons += GetFactionIcon(player);
-    }
 
     if (RaceIcon)
-    {
         icons += GetRaceIcon(player);
-    }
 
     if (ClassIcon)
-    {
         icons += GetClassIcon(player);
-    }
 
     switch (PlayerColor)
     {
@@ -364,7 +358,7 @@ std::string WorldChat::GetNameLink(Player* player)
 
     if (playerSecurity > 0 && (GMBadge == 1 || (GMBadge == 2 && (player->IsDeveloper() || player->IsGameMaster())) || (GMBadge == 3 && player->isGMChat())))
     {
-        icons = "|TINTERFACE\\CHATFRAME\\UI-CHATICON-BLIZZ:12:22:0:-3|t|r";
+        icons = "|TINTERFACE\\CHATFRAME\\UI-CHATICON-BLIZZ:12:22:0:-3|t";
 
         if (GMColors.size() > 2 && playerSecurity < GMColors.size())
         {
@@ -373,8 +367,9 @@ std::string WorldChat::GetNameLink(Player* player)
     }
 
     nameLink << icons;
-    nameLink << "|Hplayer:" << playerName << "|h";
-    nameLink << "|cff" << color << "[" << playerName << "]|h|r";
+    nameLink << "[|Hplayer:" << playerName << "|h";
+    nameLink << "|cff" << color << playerName << "|h";
+    nameLink << "|cff" << (ChatNameColor.empty() ? "FFFF00" : ChatNameColor) << "]";
 
     return nameLink.str();
 }
@@ -437,9 +432,9 @@ void WorldChat::SendWorldChat(WorldSession* session, const char* message)
     if (!session)
     {
         nameLink = GetNameLink(nullptr);
-        chat_stream << chatPrefix << " " << nameLink;
+        chat_stream << chatPrefix << " " << nameLink << ": ";
         chat_stream << "|cff" << chatColor;
-        chat_stream << ": " << chatContent;
+        chat_stream << chatContent;
 
         SendToPlayers(chat_stream.str());
         return;
@@ -576,9 +571,9 @@ void WorldChat::SendWorldChat(WorldSession* session, const char* message)
     // Update last message to avoid sending massive amounts of SysMessages as well
     WorldChatMap[player->GetGUID().GetCounter()].last_msg = GameTime::GetGameTime().count();
 
-    chat_stream << chatPrefix << " " << nameLink;
+    chat_stream << chatPrefix << " " << nameLink << ": ";
     chat_stream << "|cff" << chatColor;
-    chat_stream << ": " << chatContent;
+    chat_stream << chatContent;
 
     SendToPlayers(chat_stream.str(), player->GetTeamId());
 }
