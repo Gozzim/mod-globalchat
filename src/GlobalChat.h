@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _WORLDCHAT_H_
-#define _WORLDCHAT_H_
+#ifndef _GLOBALCHAT_H_
+#define _GLOBALCHAT_H_
 
 #include "Common.h"
 #include "Chat.h"
@@ -30,14 +30,14 @@ typedef struct
     time_t last_msg;
     time_t mute_time;
     bool banned;
-} WorldChatVars;
+} GlobalChatVars;
 
-class WorldChat
+class GlobalChat
 {
 public:
-    static WorldChat* instance();
+    static GlobalChat* instance();
 
-    bool WorldChatEnabled;
+    bool GlobalChatEnabled;
     bool Announce;
     std::string ChatName;
     std::string ChatNameColor;
@@ -66,7 +66,7 @@ public:
     std::vector <std::string> ProfanityBlacklist;
     std::vector <std::string> URLWhitelist;
 
-    std::unordered_map <uint32, WorldChatVars> WorldChatMap;
+    std::unordered_map <uint32, GlobalChatVars> GlobalChatMap;
 
     void LoadConfig(bool reload);
 
@@ -81,7 +81,7 @@ public:
 
     void MutePlayer(Player* player, int64 seconds, bool global = false);
 
-    void SendWorldChat(WorldSession* session, const char* message);
+    void SendGlobalChat(WorldSession* session, const char* message);
 
 private:
     std::string GetChatPrefix();
@@ -90,6 +90,6 @@ private:
     void SendToPlayers(std::string chatMessage, TeamId teamId = TEAM_NEUTRAL);
 };
 
-#define sWorldChat WorldChat::instance()
+#define sGlobalChat GlobalChat::instance()
 
 #endif

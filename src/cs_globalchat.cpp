@@ -17,45 +17,45 @@
 
 #include "GameTime.h"
 #include "ScriptMgr.h"
-#include "WorldChat.h"
+#include "GlobalChat.h"
 
 using namespace Acore::ChatCommands;
 
-class worldchat_commandscript : public CommandScript
+class globalchat_commandscript : public CommandScript
 {
 public:
-    worldchat_commandscript() : CommandScript("worldchat_commandscript") { }
+    globalchat_commandscript() : CommandScript("globalchat_commandscript") { }
 
     ChatCommandTable GetCommands() const override
     {
         static ChatCommandTable commandTable =
                 {
-                        { "chat",       HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
-                        { "world",      HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
-                        { "w",          HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
-                        { "c",          HandleWorldChatCommand,        SEC_PLAYER,    Console::Yes },
-                        { "joinworld",  HandleWorldChatJoinCommand,    SEC_PLAYER,    Console::No },
-                        { "leaveworld", HandleWorldChatLeaveCommand,   SEC_PLAYER,    Console::No },
-                        { "wdisable",   HandleWorldChatDisableCommand, SEC_MODERATOR, Console::Yes },
-                        { "wenable",    HandleWorldChatEnableCommand,  SEC_MODERATOR, Console::Yes },
-                        { "wmute",      HandleMuteWorldChat,           SEC_MODERATOR, Console::Yes },
-                        { "wunmute",    HandleUnmuteWorldChat,         SEC_MODERATOR, Console::Yes },
+                        { "chat",        HandleGlobalChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "global",      HandleGlobalChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "g",           HandleGlobalChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "c",           HandleGlobalChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "joinglobal",  HandleGlobalChatJoinCommand,    SEC_PLAYER,    Console::No },
+                        { "leaveglobal", HandleGlobalChatLeaveCommand,   SEC_PLAYER,    Console::No },
+                        { "gdisable",    HandleGlobalChatDisableCommand, SEC_MODERATOR, Console::Yes },
+                        { "genable",     HandleGlobalChatEnableCommand,  SEC_MODERATOR, Console::Yes },
+                        { "gmute",       HandleMuteGlobalChat,           SEC_MODERATOR, Console::Yes },
+                        { "gunmute",     HandleUnmuteGlobalChat,         SEC_MODERATOR, Console::Yes },
                 };
 
         return commandTable;
     }
 
-    static bool HandleWorldChatCommand(ChatHandler* handler, Tail message)
+    static bool HandleGlobalChatCommand(ChatHandler* handler, Tail message)
     {
         if (message.empty())
             return false;
 
         WorldSession* session = handler->GetSession();
-        sWorldChat->SendWorldChat(session, message.data());
+        sGlobalChat->SendGlobalChat(session, message.data());
         return true;
     }
 
-    static bool HandleWorldChatEnableCommand(ChatHandler* handler)
+    static bool HandleGlobalChatEnableCommand(ChatHandler* handler)
     {
         std::string playerName = "Console";
 
@@ -64,18 +64,18 @@ public:
             playerName = handler->GetSession()->GetPlayer()->GetName();
         }
 
-        if (sWorldChat->WorldChatEnabled)
+        if (sGlobalChat->GlobalChatEnabled)
         {
-            handler->PSendSysMessage("The WorldChat is already enabled.");
+            handler->PSendSysMessage("The GlobalChat is already enabled.");
             return false;
         }
 
-        sWorldChat->WorldChatEnabled = true;
+        sGlobalChat->GlobalChatEnabled = true;
         sWorld->SendWorldText(17002, playerName.c_str(), "enabled");
         return true;
     };
 
-    static bool HandleWorldChatDisableCommand(ChatHandler* handler)
+    static bool HandleGlobalChatDisableCommand(ChatHandler* handler)
     {
         std::string playerName = "Console";
         if (handler->GetSession())
@@ -83,59 +83,59 @@ public:
             playerName = handler->GetSession()->GetPlayer()->GetName();
         }
 
-        if (!sWorldChat->WorldChatEnabled)
+        if (!sGlobalChat->GlobalChatEnabled)
         {
-            handler->PSendSysMessage("The WorldChat is already disabled.");
+            handler->PSendSysMessage("The GlobalChat is already disabled.");
             return false;
         }
 
-        sWorldChat->WorldChatEnabled = false;
+        sGlobalChat->GlobalChatEnabled = false;
         sWorld->SendWorldText(17002, playerName.c_str(), "disabled");
         return true;
     };
 
-    static bool HandleWorldChatJoinCommand(ChatHandler* handler)
+    static bool HandleGlobalChatJoinCommand(ChatHandler* handler)
     {
         Player* player = handler->GetSession()->GetPlayer();
         uint64 guid = player->GetGUID().GetCounter();
 
-        if (!sWorldChat->WorldChatEnabled)
+        if (!sGlobalChat->GlobalChatEnabled)
         {
-            handler->PSendSysMessage("The WorldChat is currently disabled.");
+            handler->PSendSysMessage("The GlobalChat is currently disabled.");
             return true;
         }
 
-        if (sWorldChat->WorldChatMap[guid].enabled)
+        if (sGlobalChat->GlobalChatMap[guid].enabled)
         {
-            handler->PSendSysMessage("You already joined the WorldChat.");
+            handler->PSendSysMessage("You already joined the GlobalChat.");
             return true;
         }
 
-        sWorldChat->WorldChatMap[guid].enabled = 1;
+        sGlobalChat->GlobalChatMap[guid].enabled = 1;
 
-        handler->PSendSysMessage("You have joined the WorldChat.");
+        handler->PSendSysMessage("You have joined the GlobalChat.");
         return true;
     };
 
-    static bool HandleWorldChatLeaveCommand(ChatHandler* handler)
+    static bool HandleGlobalChatLeaveCommand(ChatHandler* handler)
     {
         Player* player = handler->GetSession()->GetPlayer();
         uint64 guid = player->GetGUID().GetCounter();
 
-        if (!sWorldChat->WorldChatMap[guid].enabled)
+        if (!sGlobalChat->GlobalChatMap[guid].enabled)
         {
-            handler->PSendSysMessage("You already left the WorldChat.");
+            handler->PSendSysMessage("You already left the GlobalChat.");
             return true;
         }
 
-        sWorldChat->WorldChatMap[guid].enabled = 0;
+        sGlobalChat->GlobalChatMap[guid].enabled = 0;
 
-        handler->PSendSysMessage("You have left the WorldChat.");
+        handler->PSendSysMessage("You have left the GlobalChat.");
 
         return true;
     };
 
-    static bool HandleMuteWorldChat(ChatHandler* handler, PlayerIdentifier player, std::string duration, Tail muteReason)
+    static bool HandleMuteGlobalChat(ChatHandler* handler, PlayerIdentifier player, std::string duration, Tail muteReason)
     {
         std::string playerName = "Console";
         Player* target = player.GetConnectedPlayer();
@@ -154,8 +154,8 @@ public:
 
         if (atoi(duration.c_str()) < 0)
         {
-            sWorldChat->WorldChatMap[guid].banned = true;
-            if (sWorldChat->AnnounceMutes)
+            sGlobalChat->GlobalChatMap[guid].banned = true;
+            if (sGlobalChat->AnnounceMutes)
             {
                 sWorld->SendWorldText(17004, playerName.c_str(), target->GetName().c_str(), muteReasonStr.c_str());
             }
@@ -170,8 +170,8 @@ public:
 
         uint32 durationSecs = TimeStringToSecs(duration);
         int64 muteTime = GameTime::GetGameTime().count() + durationSecs;
-        sWorldChat->WorldChatMap[guid].mute_time = muteTime;
-        if (sWorldChat->AnnounceMutes)
+        sGlobalChat->GlobalChatMap[guid].mute_time = muteTime;
+        if (sGlobalChat->AnnounceMutes)
         {
             sWorld->SendWorldText(17003, playerName.c_str(), target->GetName().c_str(), secsToTimeString(durationSecs, true).c_str(), muteReasonStr.c_str());
         }
@@ -184,7 +184,7 @@ public:
         return true;
     };
 
-    static bool HandleUnmuteWorldChat(ChatHandler* /*handler*/, PlayerIdentifier player)
+    static bool HandleUnmuteGlobalChat(ChatHandler* /*handler*/, PlayerIdentifier player)
     {
         Player* target = player.GetConnectedPlayer();
 
@@ -192,13 +192,13 @@ public:
             return false;
 
         uint64 guid = target->GetGUID().GetCounter();
-        sWorldChat->WorldChatMap[guid].banned = false;
-        sWorldChat->WorldChatMap[guid].mute_time = 0;
+        sGlobalChat->GlobalChatMap[guid].banned = false;
+        sGlobalChat->GlobalChatMap[guid].mute_time = 0;
         return true;
     };
 };
 
-void AddSC_worldchat_commandscript()
+void AddSC_globalchat_commandscript()
 {
-    new worldchat_commandscript();
+    new globalchat_commandscript();
 }

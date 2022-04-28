@@ -16,53 +16,53 @@
  */
 
 #include "ChannelMgr.h"
-#include "WorldChat.h"
+#include "GlobalChat.h"
 #include "ScriptMgr.h"
 
-class WorldChat_Config : public WorldScript
+class GlobalChat_Config : public WorldScript
 {
-public: WorldChat_Config() : WorldScript("WorldChat_Config") { };
+public: GlobalChat_Config() : WorldScript("GlobalChat_Config") { };
 
     void OnAfterConfigLoad(bool reload) override
     {
-        sWorldChat->LoadConfig(reload);
+        sGlobalChat->LoadConfig(reload);
     }
 };
 
-class WorldChat_Player : public PlayerScript
+class GlobalChat_Player : public PlayerScript
 {
 public:
-    WorldChat_Player() : PlayerScript("WorldChat_Player") { }
+    GlobalChat_Player() : PlayerScript("GlobalChat_Player") { }
 
     void OnLogin(Player* player)
     {
-        if (sWorldChat->WorldChatEnabled)
+        if (sGlobalChat->GlobalChatEnabled)
         {
-            if (sWorldChat->Announce)
+            if (sGlobalChat->Announce)
             {
-                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00WorldChat |rmodule. Use \".help chat\" to find out how to use it.");
+                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00GlobalChat |rmodule. Use \".help chat\" to find out how to use it.");
             }
 
-            if (sWorldChat->EnableOnLogin && sWorldChat->WorldChatMap.find(player->GetGUID().GetCounter()) == sWorldChat->WorldChatMap.end())
+            if (sGlobalChat->EnableOnLogin && sGlobalChat->GlobalChatMap.find(player->GetGUID().GetCounter()) == sGlobalChat->GlobalChatMap.end())
             {
                 // TODO: Load from db
-                sWorldChat->WorldChatMap[player->GetGUID().GetCounter()].enabled = sWorldChat->EnableOnLogin;
+                sGlobalChat->GlobalChatMap[player->GetGUID().GetCounter()].enabled = sGlobalChat->EnableOnLogin;
             }
         }
     }
 
     void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Channel* channel)
     {
-        if (sWorldChat->JoinChannel && sWorldChat->ChatName != "" && lang != LANG_ADDON && !strcmp(channel->GetName().c_str(), sWorldChat->ChatName.c_str()))
+        if (sGlobalChat->JoinChannel && sGlobalChat->ChatName != "" && lang != LANG_ADDON && !strcmp(channel->GetName().c_str(), sGlobalChat->ChatName.c_str()))
         {
-            sWorldChat->SendWorldChat(player->GetSession(), msg.c_str());
+            sGlobalChat->SendGlobalChat(player->GetSession(), msg.c_str());
             msg = -1;
         }
     }
 };
 
-void AddSC_WorldChat()
+void AddSC_GlobalChat()
 {
-    new WorldChat_Config();
-    new WorldChat_Player();
+    new GlobalChat_Config();
+    new GlobalChat_Player();
 }

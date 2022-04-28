@@ -20,39 +20,39 @@
 #include "DatabaseEnv.h"
 #include "GameTime.h"
 #include "World.h"
-#include "WorldChat.h"
+#include "GlobalChat.h"
 #include "WorldSession.h"
 
-WorldChat* WorldChat::instance()
+GlobalChat* GlobalChat::instance()
 {
-    static WorldChat instance;
+    static GlobalChat instance;
     return &instance;
 }
 
-void WorldChat::LoadConfig(bool reload)
+void GlobalChat::LoadConfig(bool reload)
 {
-    WorldChatEnabled = sConfigMgr->GetOption<bool>("WorldChat.Enable", true);
-    Announce = sConfigMgr->GetOption<bool>("WorldChat.Announce", true);
-    ChatName = sConfigMgr->GetOption<std::string>("WorldChat.Chat.Name", "World");
-    ChatNameColor = sConfigMgr->GetOption<std::string>("WorldChat.Chat.NameColor", "FFFF00");
-    ChatTextColor = sConfigMgr->GetOption<std::string>("WorldChat.Chat.TextColor", "");
-    PlayerColor = sConfigMgr->GetOption<uint32>("WorldChat.Player.NameColor", 1);
-    FactionIcon = sConfigMgr->GetOption<bool>("WorldChat.Player.FactionIcon", false);
-    RaceIcon = sConfigMgr->GetOption<bool>("WorldChat.Player.RaceIcon", true);
-    ClassIcon = sConfigMgr->GetOption<bool>("WorldChat.Player.ClassIcon", false);
-    GMBadge = sConfigMgr->GetOption<uint32>("WorldChat.GM.Badge", 1);
-    FactionSpecific = sConfigMgr->GetOption<bool>("WorldChat.FactionSpecific", false);
-    EnableOnLogin = sConfigMgr->GetOption<bool>("WorldChat.OnFirstLogin", true);
-    MinPlayTime = sConfigMgr->GetOption<uint32>("WorldChat.PlayTimeToChat", 300);
-    CoolDown = sConfigMgr->GetOption<uint32>("WorldChat.CoolDown", 2);
-    JoinChannel = sConfigMgr->GetOption<bool>("WorldChat.JoinChannelAllowed", false);
-    AnnounceMutes = sConfigMgr->GetOption<bool>("WorldChat.AnnounceMutes", false);
-    BlockProfanities = sConfigMgr->GetOption<int>("WorldChat.Profanity.Block", 0);
-    ProfanityMuteType = sConfigMgr->GetOption<uint32>("WorldChat.Profanity.MuteType", 1);
-    ProfanityMute = sConfigMgr->GetOption<uint32>("WorldChat.Profanity.MuteTime", 30);
-    BlockURLs = sConfigMgr->GetOption<int>("WorldChat.URL.Block", 0);
-    URLMuteType = sConfigMgr->GetOption<uint32>("WorldChat.URL.MuteType", 1);
-    URLMute = sConfigMgr->GetOption<uint32>("WorldChat.URL.MuteTime", 120);
+    GlobalChatEnabled = sConfigMgr->GetOption<bool>("GlobalChat.Enable", true);
+    Announce = sConfigMgr->GetOption<bool>("GlobalChat.Announce", true);
+    ChatName = sConfigMgr->GetOption<std::string>("GlobalChat.Chat.Name", "Global");
+    ChatNameColor = sConfigMgr->GetOption<std::string>("GlobalChat.Chat.NameColor", "FFFF00");
+    ChatTextColor = sConfigMgr->GetOption<std::string>("GlobalChat.Chat.TextColor", "");
+    PlayerColor = sConfigMgr->GetOption<uint32>("GlobalChat.Player.NameColor", 1);
+    FactionIcon = sConfigMgr->GetOption<bool>("GlobalChat.Player.FactionIcon", false);
+    RaceIcon = sConfigMgr->GetOption<bool>("GlobalChat.Player.RaceIcon", true);
+    ClassIcon = sConfigMgr->GetOption<bool>("GlobalChat.Player.ClassIcon", false);
+    GMBadge = sConfigMgr->GetOption<uint32>("GlobalChat.GM.Badge", 1);
+    FactionSpecific = sConfigMgr->GetOption<bool>("GlobalChat.FactionSpecific", false);
+    EnableOnLogin = sConfigMgr->GetOption<bool>("GlobalChat.OnFirstLogin", true);
+    MinPlayTime = sConfigMgr->GetOption<uint32>("GlobalChat.PlayTimeToChat", 300);
+    CoolDown = sConfigMgr->GetOption<uint32>("GlobalChat.CoolDown", 2);
+    JoinChannel = sConfigMgr->GetOption<bool>("GlobalChat.JoinChannelAllowed", false);
+    AnnounceMutes = sConfigMgr->GetOption<bool>("GlobalChat.AnnounceMutes", false);
+    BlockProfanities = sConfigMgr->GetOption<int>("GlobalChat.Profanity.Block", 0);
+    ProfanityMuteType = sConfigMgr->GetOption<uint32>("GlobalChat.Profanity.MuteType", 1);
+    ProfanityMute = sConfigMgr->GetOption<uint32>("GlobalChat.Profanity.MuteTime", 30);
+    BlockURLs = sConfigMgr->GetOption<int>("GlobalChat.URL.Block", 0);
+    URLMuteType = sConfigMgr->GetOption<uint32>("GlobalChat.URL.MuteType", 1);
+    URLMute = sConfigMgr->GetOption<uint32>("GlobalChat.URL.MuteTime", 120);
 
     if (reload)
     {
@@ -61,7 +61,7 @@ void WorldChat::LoadConfig(bool reload)
         URLWhitelist.clear();
     }
 
-    std::string configColors = sConfigMgr->GetOption<std::string>("WorldChat.GM.Colors", "00FF00;091FE0;FF0000");
+    std::string configColors = sConfigMgr->GetOption<std::string>("GlobalChat.GM.Colors", "00FF00;091FE0;FF0000");
     // Do not remove this
     GMColors.push_back("808080");
     std::string color;
@@ -73,7 +73,7 @@ void WorldChat::LoadConfig(bool reload)
     // Do not remove this
     GMColors.push_back("000000");
 
-    std::string configProfanity = sConfigMgr->GetOption<std::string>("WorldChat.Profanity.Blacklist", "");
+    std::string configProfanity = sConfigMgr->GetOption<std::string>("GlobalChat.Profanity.Blacklist", "");
     std::string profanity;
     std::istringstream ProfanityPhrases(configProfanity);
     while (std::getline(ProfanityPhrases, profanity, ';'))
@@ -81,7 +81,7 @@ void WorldChat::LoadConfig(bool reload)
         ProfanityBlacklist.push_back(profanity);
     }
 
-    std::string configUrl = sConfigMgr->GetOption<std::string>("WorldChat.URL.Whitelist", "");
+    std::string configUrl = sConfigMgr->GetOption<std::string>("GlobalChat.URL.Whitelist", "");
     std::string url;
     std::istringstream urls(configUrl);
     while (std::getline(urls, url, ';'))
@@ -90,7 +90,7 @@ void WorldChat::LoadConfig(bool reload)
     }
 }
 
-bool WorldChat::HasForbiddenPhrase(std::string message)
+bool GlobalChat::HasForbiddenPhrase(std::string message)
 {
     for (const auto& phrase: ProfanityBlacklist)
     {
@@ -103,7 +103,7 @@ bool WorldChat::HasForbiddenPhrase(std::string message)
     return false;
 }
 
-bool WorldChat::HasForbiddenURL(std::string message)
+bool GlobalChat::HasForbiddenURL(std::string message)
 {
     auto words_begin = std::sregex_iterator(message.begin(), message.end(), urlRegex);
     auto words_end = std::sregex_iterator();
@@ -119,7 +119,7 @@ bool WorldChat::HasForbiddenURL(std::string message)
     return false;
 }
 
-std::string WorldChat::GetFactionIcon(Player* player)
+std::string GlobalChat::GetFactionIcon(Player* player)
 {
     switch (player->GetTeamId())
     {
@@ -132,7 +132,7 @@ std::string WorldChat::GetFactionIcon(Player* player)
     }
 }
 
-std::string WorldChat::GetFactionColor(Player* player)
+std::string GlobalChat::GetFactionColor(Player* player)
 {
     switch (player->GetTeamId())
     {
@@ -145,7 +145,7 @@ std::string WorldChat::GetFactionColor(Player* player)
     }
 }
 
-std::string WorldChat::GetClassIcon(Player* player)
+std::string GlobalChat::GetClassIcon(Player* player)
 {
     std::ostringstream icon;
 
@@ -203,7 +203,7 @@ std::string WorldChat::GetClassIcon(Player* player)
     return icon.str();
 }
 
-std::string WorldChat::GetClassColor(Player* player)
+std::string GlobalChat::GetClassColor(Player* player)
 {
     switch (player->getClass())
     {
@@ -232,7 +232,7 @@ std::string WorldChat::GetClassColor(Player* player)
     }
 }
 
-std::string WorldChat::GetRaceIcon(Player* player)
+std::string GlobalChat::GetRaceIcon(Player* player)
 {
     std::ostringstream icon;
 
@@ -296,7 +296,7 @@ std::string WorldChat::GetRaceIcon(Player* player)
     return icon.str();
 }
 
-std::string WorldChat::GetChatPrefix()
+std::string GlobalChat::GetChatPrefix()
 {
     std::ostringstream chatPrefix;
 
@@ -309,7 +309,7 @@ std::string WorldChat::GetChatPrefix()
         }
         else
         {
-            chatPrefix << "s .world ";
+            chatPrefix << "s .global ";
         }
         chatPrefix << "|h|cff" << (ChatNameColor.empty() ? "FFFF00" : ChatNameColor);
         chatPrefix << "[" << ChatName << "]|h";
@@ -318,7 +318,7 @@ std::string WorldChat::GetChatPrefix()
     return chatPrefix.str();
 }
 
-std::string WorldChat::GetNameLink(Player* player)
+std::string GlobalChat::GetNameLink(Player* player)
 {
     std::ostringstream nameLink;
 
@@ -375,7 +375,7 @@ std::string WorldChat::GetNameLink(Player* player)
     return nameLink.str();
 }
 
-std::string WorldChat::BuildChatContent(const char* text)
+std::string GlobalChat::BuildChatContent(const char* text)
 {
     std::string content = text;
     std::string color = ChatTextColor.empty() ? "|cffFFFFFF" : "|cff" + ChatTextColor;
@@ -395,7 +395,7 @@ std::string WorldChat::BuildChatContent(const char* text)
     return content;
 }
 
-void WorldChat::SendToPlayers(std::string chatMessage, TeamId teamId)
+void GlobalChat::SendToPlayers(std::string chatMessage, TeamId teamId)
 {
     SessionMap sessions = sWorld->GetAllSessions();
     for (SessionMap::iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
@@ -408,7 +408,7 @@ void WorldChat::SendToPlayers(std::string chatMessage, TeamId teamId)
         Player* target = itr->second->GetPlayer();
         uint64 guid2 = target->GetGUID().GetCounter();
 
-        if (WorldChatMap[guid2].enabled == 1)
+        if (GlobalChatMap[guid2].enabled == 1)
         {
             if (!FactionSpecific || teamId == TEAM_NEUTRAL || teamId == target->GetTeamId())
             {
@@ -418,7 +418,7 @@ void WorldChat::SendToPlayers(std::string chatMessage, TeamId teamId)
     }
 }
 
-void WorldChat::SendWorldChat(WorldSession* session, const char* message)
+void GlobalChat::SendGlobalChat(WorldSession* session, const char* message)
 {
     Player* player;
 
@@ -449,38 +449,38 @@ void WorldChat::SendWorldChat(WorldSession* session, const char* message)
     AccountTypes playerSecurity = session->GetSecurity();
 
     // Prevent Spamming first to avoid sending massive amounts of SysMessages as well
-    if (WorldChatMap[guid].last_msg + CoolDown >= GameTime::GetGameTime().count() && playerSecurity == 0)
+    if (GlobalChatMap[guid].last_msg + CoolDown >= GameTime::GetGameTime().count() && playerSecurity == 0)
     {
         return;
     }
 
-    if (playerSecurity == 0 && !WorldChatEnabled)
+    if (playerSecurity == 0 && !GlobalChatEnabled)
     {
-        ChatHandler(session).PSendSysMessage("|cffff0000WorldChat is currently disabled.|r");
+        ChatHandler(session).PSendSysMessage("|cffff0000GlobalChat is currently disabled.|r");
         return;
     }
 
-    if (WorldChatMap[guid].banned)
+    if (GlobalChatMap[guid].banned)
     {
-        ChatHandler(session).PSendSysMessage("|cffff0000You are currently banned from the WorldChat.|r");
+        ChatHandler(session).PSendSysMessage("|cffff0000You are currently banned from the GlobalChat.|r");
         return;
     }
 
-    if (!player->CanSpeak() || WorldChatMap[guid].mute_time > GameTime::GetGameTime().count())
+    if (!player->CanSpeak() || GlobalChatMap[guid].mute_time > GameTime::GetGameTime().count())
     {
         uint32 muteLeft = session->m_muteTime - GameTime::GetGameTime().count();
-        if (WorldChatMap[guid].mute_time > session->m_muteTime)
+        if (GlobalChatMap[guid].mute_time > session->m_muteTime)
         {
-            muteLeft = WorldChatMap[guid].mute_time - GameTime::GetGameTime().count();
+            muteLeft = GlobalChatMap[guid].mute_time - GameTime::GetGameTime().count();
         }
 
-        ChatHandler(session).PSendSysMessage("|cffff0000You can't use the WorldChat while muted.|r You need to wait another %s.", secsToTimeString(muteLeft));
+        ChatHandler(session).PSendSysMessage("|cffff0000You can't use the GlobalChat while muted.|r You need to wait another %s.", secsToTimeString(muteLeft));
         return;
     }
 
-    if (!WorldChatMap[guid].enabled)
+    if (!GlobalChatMap[guid].enabled)
     {
-        ChatHandler(session).PSendSysMessage("|cffff0000You have not joined the WorldChat. Type |r.joinworld|cffff0000 to join the WorldChat.|r");
+        ChatHandler(session).PSendSysMessage("|cffff0000You have not joined the GlobalChat. Type |r.joinglobal|cffff0000 to join the GlobalChat.|r");
         return;
     }
 
@@ -506,7 +506,7 @@ void WorldChat::SendWorldChat(WorldSession* session, const char* message)
 
             if (ProfanityMuteType >= 1)
             {
-                WorldChatMap[guid].mute_time = muteTime;
+                GlobalChatMap[guid].mute_time = muteTime;
             }
 
             if (ProfanityMuteType >= 2)
@@ -542,7 +542,7 @@ void WorldChat::SendWorldChat(WorldSession* session, const char* message)
 
             if (URLMuteType >= 1)
             {
-                WorldChatMap[guid].mute_time = muteTime;
+                GlobalChatMap[guid].mute_time = muteTime;
             }
 
             if (URLMuteType >= 2)
@@ -565,12 +565,12 @@ void WorldChat::SendWorldChat(WorldSession* session, const char* message)
     {
         std::string adStr = secsToTimeString(MinPlayTime - player->GetTotalPlayedTime());
         std::string minTime = secsToTimeString(MinPlayTime);
-        session->SendNotification("You must have played at least %s to use the WorldChat. %s remaining.", minTime.c_str(), adStr.c_str());
+        session->SendNotification("You must have played at least %s to use the GlobalChat. %s remaining.", minTime.c_str(), adStr.c_str());
         return;
     }
 
     // Update last message to avoid sending massive amounts of SysMessages as well
-    WorldChatMap[player->GetGUID().GetCounter()].last_msg = GameTime::GetGameTime().count();
+    GlobalChatMap[player->GetGUID().GetCounter()].last_msg = GameTime::GetGameTime().count();
 
     chat_stream << chatPrefix << " " << nameLink << ": ";
     chat_stream << "|cff" << chatColor;

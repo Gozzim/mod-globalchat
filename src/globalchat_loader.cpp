@@ -15,11 +15,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-void AddSC_WorldChat();
-void AddSC_worldchat_commandscript();
+void AddSC_GlobalChat();
+void AddSC_globalchat_commandscript();
 
-void Addmod_worldchatScripts()
+void Addmod_globalchatScripts()
 {
-    AddSC_WorldChat();
-    AddSC_worldchat_commandscript();
+    AddSC_GlobalChat();
+    AddSC_globalchat_commandscript();
 }
