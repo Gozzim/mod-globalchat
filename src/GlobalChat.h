@@ -53,14 +53,16 @@ public:
     uint32 CoolDown;
     bool JoinChannel;
     bool AnnounceMutes;
-    int BlockProfanities;
+    uint32 ProfanityBlockType;
+    uint32 ProfanityBlockLevel;
     uint32 ProfanityMuteType;
     uint32 ProfanityMute;
-    int BlockURLs;
+    uint32 URLBlockType;
+    uint32 URLBlockLevel;
     uint32 URLMuteType;
     uint32 URLMute;
 
-    const std::regex urlRegex = std::regex{ "((http|ftp)s?://)?([\\w]*(?::[\\w]*)?@)?((?:(www\\.)?(?:[a-zA-Z0-9-\\.]{1,256}\\.[a-zA-Z]{2,63}))|(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(:\\d+)?(/[\\w\\.()-/\\\\]*)?((\\?([^#\\s&]+=[^#\\s&]+)(?:&([^#\\s&]+=[^#\\s&]+))*)?(#\\S*)?)?" };
+    const std::regex urlRegex = std::regex{ "((?:http|ftp)s?://)?([\\w]*(?::[\\w]*)?@)?((?:(www\\.)?(?:([a-zA-Z0-9-\\.]{1,256})(\\.[a-zA-Z]{2,63})))|((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)))(:\\d+)?(/[\\w\\.()-/\\\\]*)?((\\?([^#\\s&]+=[^#\\s&]+)(?:&([^#\\s&]+=[^#\\s&]+))*)?(#\\S*)?)?" };
 
     std::vector <std::string> GMColors;
     std::vector <std::string> ProfanityBlacklist;
@@ -72,6 +74,8 @@ public:
 
     bool HasForbiddenPhrase(std::string message);
     bool HasForbiddenURL(std::string message);
+    std::string CensorForbiddenPhrase(std::string message);
+    std::string CensorForbiddenURL(std::string message);
 
     std::string GetFactionIcon(Player* player);
     std::string GetFactionColor(Player* player);
@@ -86,7 +90,7 @@ public:
 private:
     std::string GetChatPrefix();
     std::string GetNameLink(Player* player);
-    std::string BuildChatContent(const char* text);
+    std::string BuildChatContent(std::string text);
     void SendToPlayers(std::string chatMessage, TeamId teamId = TEAM_NEUTRAL);
 };
 

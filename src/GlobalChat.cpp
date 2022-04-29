@@ -47,10 +47,12 @@ void GlobalChat::LoadConfig(bool reload)
     CoolDown = sConfigMgr->GetOption<uint32>("GlobalChat.CoolDown", 2);
     JoinChannel = sConfigMgr->GetOption<bool>("GlobalChat.JoinChannelAllowed", false);
     AnnounceMutes = sConfigMgr->GetOption<bool>("GlobalChat.AnnounceMutes", false);
-    BlockProfanities = sConfigMgr->GetOption<int>("GlobalChat.Profanity.Block", 0);
+    ProfanityBlockType = sConfigMgr->GetOption<uint32>("GlobalChat.Profanity.BlockType", 1);
+    ProfanityBlockLevel = sConfigMgr->GetOption<uint32>("GlobalChat.Profanity.BlockLevel", 0);
     ProfanityMuteType = sConfigMgr->GetOption<uint32>("GlobalChat.Profanity.MuteType", 1);
     ProfanityMute = sConfigMgr->GetOption<uint32>("GlobalChat.Profanity.MuteTime", 30);
-    BlockURLs = sConfigMgr->GetOption<int>("GlobalChat.URL.Block", 0);
+    URLBlockType = sConfigMgr->GetOption<uint32>("GlobalChat.URL.BlockType", 1);
+    URLBlockLevel = sConfigMgr->GetOption<uint32>("GlobalChat.URL.BlockLevel", 0);
     URLMuteType = sConfigMgr->GetOption<uint32>("GlobalChat.URL.MuteType", 1);
     URLMute = sConfigMgr->GetOption<uint32>("GlobalChat.URL.MuteTime", 120);
 
@@ -112,11 +114,54 @@ bool GlobalChat::HasForbiddenURL(std::string message)
     {
         std::smatch match = *i;
 
-        if (!(std::find(URLWhitelist.begin(), URLWhitelist.end(), match[4].str()) != URLWhitelist.end()))
-            return true;
+        if (std::find(URLWhitelist.begin(), URLWhitelist.end(), match[3].str()) != URLWhitelist.end())
+            continue;
+
+        return true;
     }
 
     return false;
+}
+
+std::string GlobalChat::CensorForbiddenPhrase(std::string message)
+{
+    for (const auto& phrase: ProfanityBlacklist)
+    {
+        message.replace(message.find(phrase), phrase.length(), std::string(phrase.length(), '*'));
+    }
+
+    return message;
+}
+
+std::string GlobalChat::CensorForbiddenURL(std::string message)
+{
+    std::ostringstream result;
+    std::smatch match;
+
+    if (std::regex_search(message, match, urlRegex)) {
+        result << match.prefix();
+
+        if (std::find(URLWhitelist.begin(), URLWhitelist.end(), match[3].str()) != URLWhitelist.end())
+        {
+            result << match.str();
+        }
+        else
+        {
+            if (match[7].str().size() > 0)
+                result << std::string(match[7].str().size(), '*');
+
+            if (match[5].str().size() > 0)
+            {
+                result << match[1].str() << match[4].str();
+                result << std::string(match[5].str().size(), '*');
+                result << match[6].str();
+            }
+        }
+
+        result << CensorForbiddenURL(match.suffix());
+    }
+
+    return result.str();
 }
 
 std::string GlobalChat::GetFactionIcon(Player* player)
@@ -375,7 +420,7 @@ std::string GlobalChat::GetNameLink(Player* player)
     return nameLink.str();
 }
 
-std::string GlobalChat::BuildChatContent(const char* text)
+std::string GlobalChat::BuildChatContent(std::string text)
 {
     std::string content = text;
     std::string color = ChatTextColor.empty() ? "|cffFFFFFF" : "|cff" + ChatTextColor;
@@ -424,8 +469,8 @@ void GlobalChat::SendGlobalChat(WorldSession* session, const char* message)
 
     std::string nameLink;
     std::string chatPrefix = GetChatPrefix();
-    std::string chatContent = BuildChatContent(message);
-    std::string chatMessage;
+    std::string chatText = message;
+    std::string chatContent;
 
     std::string chatColor = ChatTextColor.empty() ? "FFFFFF" : ChatTextColor;
     std::ostringstream chat_stream;
@@ -433,6 +478,8 @@ void GlobalChat::SendGlobalChat(WorldSession* session, const char* message)
     if (!session)
     {
         nameLink = GetNameLink(nullptr);
+        chatContent = BuildChatContent(chatText);
+
         chat_stream << chatPrefix << " " << nameLink << ": ";
         chat_stream << "|cff" << chatColor;
         chat_stream << chatContent;
@@ -484,81 +531,97 @@ void GlobalChat::SendGlobalChat(WorldSession* session, const char* message)
         return;
     }
 
-    if (chatContent.empty())
+    if (chatText.empty())
     {
         ChatHandler(session).PSendSysMessage("Your message cannot be empty.");
         return;
     }
 
-    if (BlockProfanities >= 0 && playerSecurity <= BlockProfanities && HasForbiddenPhrase(message))
+    if (ProfanityBlockType > 0 && playerSecurity <= ProfanityBlockLevel && HasForbiddenPhrase(message))
     {
-        if (playerSecurity > 0)
+        if (ProfanityBlockType == 1)
+        {
+            chatText = CensorForbiddenPhrase(chatText);
+        }
+
+        if ((playerSecurity > 0 && ProfanityBlockType != 1) || ProfanityBlockType == 2)
         {
             ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase.");
             return;
         }
 
-        if (ProfanityMute > 0)
+        if (ProfanityBlockType == 3)
         {
-            sWorld->SendGMText(17000, playerName, message); // send report to GMs
-            ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase. You have been muted for %s.", secsToTimeString(ProfanityMute));
-            int64 muteTime = GameTime::GetGameTime().count() + ProfanityMute;
-
-            if (ProfanityMuteType >= 1)
+            if (ProfanityMute > 0)
             {
-                GlobalChatMap[guid].mute_time = muteTime;
+                sWorld->SendGMText(17000, playerName, message); // send report to GMs
+                ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase. You have been muted for %s.", secsToTimeString(ProfanityMute));
+                int64 muteTime = GameTime::GetGameTime().count() + ProfanityMute;
+
+                if (ProfanityMuteType >= 1)
+                {
+                    GlobalChatMap[guid].mute_time = muteTime;
+                }
+
+                if (ProfanityMuteType >= 2)
+                {
+                    LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
+                    session->m_muteTime = muteTime;
+                    mt->SetData(0, muteTime);
+                }
+            }
+            else
+            {
+                sWorld->SendGMText(17000, playerName, message); // send report to GMs
+                ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase.");
             }
 
-            if (ProfanityMuteType >= 2)
-            {
-                LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
-                session->m_muteTime = muteTime;
-                mt->SetData(0, muteTime);
-            }
-
+            return;
         }
-        else
-        {
-            sWorld->SendGMText(17000, playerName, message); // send report to GMs
-            ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase.");
-        }
-
-        return;
     }
 
-    if (BlockURLs >= 0 && playerSecurity <= BlockURLs && HasForbiddenURL(message))
+    if (URLBlockType > 0 && playerSecurity <= URLBlockLevel && HasForbiddenURL(message))
     {
-        if (playerSecurity > 0)
+        if (URLBlockType == 1)
+        {
+            chatText = CensorForbiddenURL(chatText);
+        }
+
+        if ((playerSecurity > 0 && URLBlockType != 1) || URLBlockType == 2)
         {
             ChatHandler(session).PSendSysMessage("Urls are not allowed.");
             return;
         }
 
-        if (URLMute > 0)
+        if (URLBlockType == 3)
         {
-            sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
-            ChatHandler(session).PSendSysMessage("Urls are not allowed. You have been muted for %s.", secsToTimeString(URLMute));
-            int64 muteTime = GameTime::GetGameTime().count() + URLMute; // muted player
-
-            if (URLMuteType >= 1)
+            if (URLMute > 0)
             {
-                GlobalChatMap[guid].mute_time = muteTime;
+                sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
+                ChatHandler(session).PSendSysMessage("Urls are not allowed. You have been muted for %s.", secsToTimeString(URLMute));
+                int64 muteTime = GameTime::GetGameTime().count() + URLMute; // muted player
+
+                if (URLMuteType >= 1)
+                {
+                    GlobalChatMap[guid].mute_time = muteTime;
+                }
+
+                if (URLMuteType >= 2)
+                {
+                    LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
+                    session->m_muteTime = muteTime;
+                    mt->SetData(0, muteTime);
+                }
+            }
+            else
+            {
+                sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
+                ChatHandler(session).PSendSysMessage("Urls are not allowed.");
+                return;
             }
 
-            if (URLMuteType >= 2)
-            {
-                LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
-                session->m_muteTime = muteTime;
-                mt->SetData(0, muteTime);
-            }
+            return;
         }
-        else
-        {
-            sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
-            ChatHandler(session).PSendSysMessage("Urls are not allowed.");
-        }
-
-        return;
     }
 
     if (player->GetTotalPlayedTime() <= MinPlayTime && session->GetSecurity() == 0)
@@ -568,6 +631,9 @@ void GlobalChat::SendGlobalChat(WorldSession* session, const char* message)
         session->SendNotification("You must have played at least %s to use the GlobalChat. %s remaining.", minTime.c_str(), adStr.c_str());
         return;
     }
+
+    // Build Chat Content from text
+    chatContent = BuildChatContent(chatText);
 
     // Update last message to avoid sending massive amounts of SysMessages as well
     GlobalChatMap[player->GetGUID().GetCounter()].last_msg = GameTime::GetGameTime().count();
