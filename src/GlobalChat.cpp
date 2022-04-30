@@ -158,10 +158,10 @@ std::string GlobalChat::CensorForbiddenURL(std::string message)
             }
         }
 
-        result << CensorForbiddenURL(match.suffix());
+        return result.str() + CensorForbiddenURL(match.suffix());
     }
 
-    return result.str();
+    return message;
 }
 
 std::string GlobalChat::GetFactionIcon(Player* player)
