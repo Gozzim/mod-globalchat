@@ -141,20 +141,20 @@ std::string GlobalChat::CensorForbiddenURL(std::string message)
     if (std::regex_search(message, match, urlRegex)) {
         result << match.prefix();
 
-        if (std::find(URLWhitelist.begin(), URLWhitelist.end(), match[3].str()) != URLWhitelist.end())
+        if (std::find(URLWhitelist.begin(), URLWhitelist.end(), match[5].str()) != URLWhitelist.end())
         {
             result << match.str();
         }
         else
         {
-            if (match[7].str().size() > 0)
-                result << std::string(match[7].str().size(), '*');
+            if (match[8].str().size() > 0)
+                result << std::string(match[8].str().size(), '*');
 
-            if (match[5].str().size() > 0)
+            if (match[6].str().size() > 0)
             {
                 result << match[1].str() << match[4].str();
-                result << std::string(match[5].str().size(), '*');
-                result << match[6].str();
+                result << std::string(match[6].str().size(), '*');
+                result << match[7].str();
             }
         }
 
