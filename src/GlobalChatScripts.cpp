@@ -43,7 +43,7 @@ public:
                 ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00GlobalChat|r module. Use |cff4CFF00.help global|r to find out how to use it.");
             }
 
-            sGlobalChatMgr->LoadPlayerData(player->GetGUID());
+            sGlobalChatMgr->LoadPlayerData(player);
 
             if (!sGlobalChatMgr->IsInChat(player->GetGUID()))
             {
@@ -61,7 +61,7 @@ public:
 
     void OnSave(Player* player)
     {
-        sGlobalChatMgr->SavePlayerData(player->GetGUID());
+        sGlobalChatMgr->SavePlayerData(player);
     }
 
     void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Channel* channel)
