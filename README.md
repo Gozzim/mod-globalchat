@@ -12,8 +12,8 @@ Advanced GlobalChat with detailed options to configure individually
 - Set Chat Name/NameColor/TextColor
 - Configure Class/Race/Faction Icons to your need
 - Spam Protection
-- URL Filters
-- Profanity Filters
+- URL Filters/Censoring
+- Profanity Filters/Censoring
 - Players can join and leave the chat
 - Support for custom GM ranks
 - And many more options
