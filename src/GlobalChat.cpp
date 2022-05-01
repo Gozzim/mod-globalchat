@@ -127,7 +127,10 @@ std::string GlobalChat::CensorForbiddenPhrase(std::string message)
 {
     for (const auto& phrase: ProfanityBlacklist)
     {
-        message.replace(message.find(phrase), phrase.length(), std::string(phrase.length(), '*'));
+        if (message.find(phrase) != std::string::npos)
+        {
+            message.replace(message.find(phrase), phrase.length(), std::string(phrase.length(), '*'));
+        }
     }
 
     return message;
