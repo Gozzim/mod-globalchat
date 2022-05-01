@@ -40,7 +40,7 @@ public:
         {
             if (sGlobalChatMgr->Announce)
             {
-                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00WorldChat|r module. Use |cff4CFF00.help global|r to find out how to use it.");
+                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00GlobalChat|r module. Use |cff4CFF00.help global|r to find out how to use it.");
             }
 
             sGlobalChatMgr->LoadPlayerData(player);
@@ -49,11 +49,11 @@ public:
             {
                 if (sGlobalChatMgr->JoinChannel)
                 {
-                    ChatHandler(player->GetSession()).SendSysMessage("You can join the |cffFF0000WorldChat|r by typing |cffFF0000.joinglobal|r or |cffFF0000/join %s|r at any time.", sGlobalChatMgr->ChatName.c_str());
+                    ChatHandler(player->GetSession()).SendSysMessage("You can join the |cffFF0000GlobalChat|r by typing |cffFF0000.joinglobal|r or |cffFF0000/join %s|r at any time.", sGlobalChatMgr->ChatName.c_str());
                 }
                 else
                 {
-                    ChatHandler(player->GetSession()).SendSysMessage("You can join the |cffFF0000WorldChat|r by typing |cffFF0000.joinglobal|r at any time.");
+                    ChatHandler(player->GetSession()).SendSysMessage("You can join the |cffFF0000GlobalChat|r by typing |cffFF0000.joinglobal|r at any time.");
                 }
             }
         }
