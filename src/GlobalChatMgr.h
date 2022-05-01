@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _GLOBALCHAT_H_
-#define _GLOBALCHAT_H_
+#ifndef _GLOBALCHATMGR_H_
+#define _GLOBALCHATMGR_H_
 
 #include "Common.h"
 #include "Chat.h"
@@ -27,10 +27,10 @@
 
 class GlobalChatData;
 
-class GlobalChat
+class GlobalChatMgr
 {
 public:
-    static GlobalChat* instance();
+    static GlobalChatMgr* instance();
 
     bool GlobalChatEnabled;
     bool Announce;
@@ -96,6 +96,6 @@ private:
     GlobalChatPlayersDataMap playersChatData;
 };
 
-#define sGlobalChat GlobalChat::instance()
+#define sGlobalChatMgr GlobalChatMgr::instance()
 
 #endif

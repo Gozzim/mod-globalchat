@@ -19,7 +19,7 @@
 
 GlobalChatData::GlobalChatData()
 {
-    inChat = sGlobalChat->EnableOnLogin;
+    inChat = sGlobalChatMgr->EnableOnLogin;
     lastMessage = 0;
     muteTime = 0;
     totalMutes = 0;

@@ -18,7 +18,7 @@
 #ifndef _GLOBALCHATDATA_H_
 #define _GLOBALCHATDATA_H_
 
-#include "GlobalChat.h"
+#include "GlobalChatMgr.h"
 
 class GlobalChatData
 {

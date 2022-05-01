@@ -16,7 +16,7 @@
  */
 
 #include "ChannelMgr.h"
-#include "GlobalChat.h"
+#include "GlobalChatMgr.h"
 #include "ScriptMgr.h"
 
 class GlobalChat_Config : public WorldScript
@@ -25,7 +25,7 @@ public: GlobalChat_Config() : WorldScript("GlobalChat_Config") { };
 
     void OnAfterConfigLoad(bool reload) override
     {
-        sGlobalChat->LoadConfig(reload);
+        sGlobalChatMgr->LoadConfig(reload);
     }
 };
 
@@ -36,9 +36,9 @@ public:
 
     void OnLogin(Player* player)
     {
-        if (sGlobalChat->GlobalChatEnabled)
+        if (sGlobalChatMgr->GlobalChatEnabled)
         {
-            if (sGlobalChat->Announce)
+            if (sGlobalChatMgr->Announce)
             {
                 ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00GlobalChat |rmodule. Use \".help chat\" to find out how to use it.");
             }
@@ -47,9 +47,9 @@ public:
 
     void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Channel* channel)
     {
-        if (sGlobalChat->JoinChannel && sGlobalChat->ChatName != "" && lang != LANG_ADDON && !strcmp(channel->GetName().c_str(), sGlobalChat->ChatName.c_str()))
+        if (sGlobalChatMgr->JoinChannel && sGlobalChatMgr->ChatName != "" && lang != LANG_ADDON && !strcmp(channel->GetName().c_str(), sGlobalChatMgr->ChatName.c_str()))
         {
-            sGlobalChat->SendGlobalChat(player->GetSession(), msg.c_str());
+            sGlobalChatMgr->SendGlobalChat(player->GetSession(), msg.c_str());
             msg = -1;
         }
     }

@@ -17,7 +17,7 @@
 
 #include "GameTime.h"
 #include "ScriptMgr.h"
-#include "GlobalChat.h"
+#include "GlobalChatMgr.h"
 
 using namespace Acore::ChatCommands;
 
@@ -51,7 +51,7 @@ public:
             return false;
 
         WorldSession* session = handler->GetSession();
-        sGlobalChat->SendGlobalChat(session, message.data());
+        sGlobalChatMgr->SendGlobalChat(session, message.data());
         return true;
     }
 
@@ -64,13 +64,13 @@ public:
             playerName = handler->GetSession()->GetPlayer()->GetName();
         }
 
-        if (sGlobalChat->GlobalChatEnabled)
+        if (sGlobalChatMgr->GlobalChatEnabled)
         {
             handler->PSendSysMessage("The GlobalChat is already enabled.");
             return false;
         }
 
-        sGlobalChat->GlobalChatEnabled = true;
+        sGlobalChatMgr->GlobalChatEnabled = true;
         sWorld->SendWorldText(17002, playerName.c_str(), "enabled");
         return true;
     };
@@ -83,26 +83,26 @@ public:
             playerName = handler->GetSession()->GetPlayer()->GetName();
         }
 
-        if (!sGlobalChat->GlobalChatEnabled)
+        if (!sGlobalChatMgr->GlobalChatEnabled)
         {
             handler->PSendSysMessage("The GlobalChat is already disabled.");
             return false;
         }
 
-        sGlobalChat->GlobalChatEnabled = false;
+        sGlobalChatMgr->GlobalChatEnabled = false;
         sWorld->SendWorldText(17002, playerName.c_str(), "disabled");
         return true;
     };
 
     static bool HandleGlobalChatJoinCommand(ChatHandler* handler)
     {
-        sGlobalChat->PlayerJoinCommand(handler);
+        sGlobalChatMgr->PlayerJoinCommand(handler);
         return true;
     };
 
     static bool HandleGlobalChatLeaveCommand(ChatHandler* handler)
     {
-        sGlobalChat->PlayerLeaveCommand(handler);
+        sGlobalChatMgr->PlayerLeaveCommand(handler);
         return true;
     };
 
@@ -125,8 +125,8 @@ public:
 
         if (atoi(duration.c_str()) < 0)
         {
-            sGlobalChat->Ban(guid);
-            if (sGlobalChat->AnnounceMutes)
+            sGlobalChatMgr->Ban(guid);
+            if (sGlobalChatMgr->AnnounceMutes)
             {
                 sWorld->SendWorldText(17004, playerName.c_str(), target->GetName().c_str(), muteReasonStr.c_str());
             }
@@ -140,9 +140,9 @@ public:
         }
 
         uint32 durationSecs = TimeStringToSecs(duration);
-        sGlobalChat->Mute(guid, durationSecs);
+        sGlobalChatMgr->Mute(guid, durationSecs);
 
-        if (sGlobalChat->AnnounceMutes)
+        if (sGlobalChatMgr->AnnounceMutes)
         {
             sWorld->SendWorldText(17003, playerName.c_str(), target->GetName().c_str(), secsToTimeString(durationSecs, true).c_str(), muteReasonStr.c_str());
         }
@@ -163,7 +163,7 @@ public:
             return false;
 
         ObjectGuid guid = target->GetGUID();
-        sGlobalChat->Unmute(guid);
+        sGlobalChatMgr->Unmute(guid);
 
         return true;
     };

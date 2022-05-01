@@ -16,10 +16,3 @@
  */
 
 void AddSC_GlobalChat();
-void AddSC_globalchat_commandscript();
-
-void Addmod_globalchatScripts()
-{
-    AddSC_GlobalChat();
-    AddSC_globalchat_commandscript();
-}
