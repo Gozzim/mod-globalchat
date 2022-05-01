@@ -40,6 +40,7 @@ public:
                         { "genable",     HandleGlobalChatEnableCommand,  SEC_MODERATOR, Console::Yes },
                         { "gmute",       HandleMuteGlobalChat,           SEC_MODERATOR, Console::Yes },
                         { "gunmute",     HandleUnmuteGlobalChat,         SEC_MODERATOR, Console::Yes },
+                        { "ginfo",       HandlePlayerInfoGlobalChat,     SEC_MODERATOR, Console::Yes },
                 };
 
         return commandTable;
@@ -111,7 +112,14 @@ public:
         std::string playerName = "Console";
         Player* target = player.GetConnectedPlayer();
 
-        if (!target || duration.empty())
+        if (!target)
+        {
+            handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (duration.empty())
             return false;
 
         if (handler->GetSession() && handler->GetSession()->GetSecurity() <= target->GetSession()->GetSecurity())
@@ -155,15 +163,39 @@ public:
         return true;
     };
 
-    static bool HandleUnmuteGlobalChat(ChatHandler* /*handler*/, PlayerIdentifier player)
+    static bool HandleUnmuteGlobalChat(ChatHandler* handler, PlayerIdentifier player)
     {
         Player* target = player.GetConnectedPlayer();
 
         if (!target)
+        {
+            handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            handler->SetSentErrorMessage(true);
             return false;
+        }
 
         ObjectGuid guid = target->GetGUID();
         sGlobalChatMgr->Unmute(guid);
+
+        return true;
+    };
+
+    static bool HandlePlayerInfoGlobalChat(ChatHandler* handler, Optional<PlayerIdentifier> player)
+    {
+        if (!player)
+        {
+            player = PlayerIdentifier::FromTarget(handler);
+        }
+
+        if (!player || !player->IsConnected())
+        {
+            handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        Player* target = player->GetConnectedPlayer();
+        sGlobalChatMgr->PlayerInfoCommand(handler, target);
 
         return true;
     };

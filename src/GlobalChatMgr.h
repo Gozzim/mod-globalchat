@@ -87,6 +87,7 @@ public:
 
     void PlayerJoinCommand(ChatHandler* handler);
     void PlayerLeaveCommand(ChatHandler* handler);
+    void PlayerInfoCommand(ChatHandler* handler, Player* player);
 
 private:
     std::string GetChatPrefix();

@@ -135,7 +135,7 @@ void GlobalChatMgr::Mute(ObjectGuid guid, uint32 duration)
     int64 muteTime = GameTime::GetGameTime().count() + duration;
     playersChatData[guid].SetMuteTime(muteTime);
     uint32 totalMutes = playersChatData[guid].GetTotalMutes();
-    playersChatData[guid].SetTotalMutes(totalMutes++);
+    playersChatData[guid].SetTotalMutes(totalMutes + 1);
 }
 
 void GlobalChatMgr::Ban(ObjectGuid guid)
@@ -742,4 +742,23 @@ void GlobalChatMgr::PlayerLeaveCommand(ChatHandler* handler)
 
     playersChatData[guid].SetInChat(false);
     handler->PSendSysMessage("You have left the GlobalChat.");
+}
+
+void GlobalChatMgr::PlayerInfoCommand(ChatHandler* handler, Player* player)
+{
+    ObjectGuid guid = player->GetGUID();
+
+    bool inChat = IsInChat(guid);
+    time_t lastMessage = playersChatData[guid].GetLastMessage();
+    time_t muteTime = playersChatData[guid].GetMuteTime();
+    uint32 totalMutes = playersChatData[guid].GetTotalMutes();
+    bool isBanned = playersChatData[guid].IsBanned();
+
+    bool isMuted = muteTime > GameTime::GetGameTime().count();
+    std::string lastMsgStr = Acore::Time::TimeToTimestampStr(Seconds(lastMessage));
+
+    handler->PSendSysMessage("GlobalChat information about player |cff4CFF00%s|r", player->GetName().c_str());
+    handler->PSendSysMessage("> In Chat: %s || Last Message: %s ", inChat ? "|cff4CFF00Yes|r" : "|cffFF0000No|r", lastMsgStr);
+    handler->PSendSysMessage("> Muted: %s || Mute Time: %s", isMuted ? "|cffFF0000Yes|r" : "|cff4CFF00No|r", isMuted ? secsToTimeString(muteTime - GameTime::GetGameTime().count(), true).c_str() : "0");
+    handler->PSendSysMessage("> Total Mutes: %u || Banned: %s", totalMutes, isBanned ? "|cffFF0000Yes|r" : "|cff4CFF00No|r");
 }

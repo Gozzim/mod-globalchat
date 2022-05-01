@@ -31,6 +31,7 @@ Advanced GlobalChat with detailed options to configure individually
 - `.gdisable` - Disables the GlobalChat (GMs can still send messages)
 - `.gmute` - Mute a player in the GlobalChat for a certain amount of time or permanently
 - `.gunmute` - Unmute a player in the GlobalChat
+- `.ginfo` - Get information about player (Mutes, etc.)
 
 ## Installation
 ```
