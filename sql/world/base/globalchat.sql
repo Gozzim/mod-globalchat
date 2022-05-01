@@ -9,7 +9,7 @@ INSERT INTO `acore_string` (`entry`, `content_default`, `locale_koKR`, `locale_f
 (17005, '|cffff0000You have been muted for %s in the WorldChat.|r Reason: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (17006, '|cffff0000You have been permanently muted in the WorldChat.|r Reason: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);                                                                                                                                                                           ;
 
-DELETE FROM `command` WHERE `name` IN ('global','g','chat','c','joinglobal','leaveglobal','wenable','wdisable','wmute','wunmute','ginfo');
+DELETE FROM `command` WHERE `name` IN ('global','g','chat','c','joinworld','leaveworld','wenable','wdisable','wmute','wunmute','winfo');
 INSERT INTO `command` (`name`, `security`, `help`) VALUES
 ('world', 0, 'Syntax: .global $text\nWrite a message in the WorldChat.\nAdditional commands: .joinworld & .leaveworld'),
 ('w', 0, 'Syntax: .g $text\nWrite a message in the WorldChat.\nAdditional commands: .joinworld & .leaveworld'),
