@@ -64,6 +64,8 @@ public:
     std::vector <std::string> URLWhitelist;
 
     void LoadConfig(bool reload);
+    void LoadPlayerData(Player* player);
+    void SavePlayerData(Player* player);
 
     bool IsInChat(ObjectGuid guid);
     void Mute(ObjectGuid guid, uint32 duration);

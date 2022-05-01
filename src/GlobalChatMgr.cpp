@@ -92,6 +92,39 @@ void GlobalChatMgr::LoadConfig(bool reload)
     }
 }
 
+void GlobalChatMgr::LoadPlayerData(Player* player)
+{
+    ObjectGuid guid = player->GetGUID();
+
+    QueryResult result = CharacterDatabase.Query("SELECT enabled,last_msg,mute_time,total_mutes,banned FROM player_globalchat_status WHERE guid={};", guid.GetCounter());
+
+    if (!result)
+        return;
+
+    if (result->GetRowCount() == 0)
+        return;
+
+    Field* fields   = result->Fetch();
+
+    bool enabled = fields[0].Get<bool>();
+    time_t lastMessage = time_t(fields[1].Get<uint32>());
+    time_t muteTime = time_t(fields[2].Get<uint32>());
+    uint32 totalMutes = fields[3].Get<uint32>();
+    bool banned = fields[4].Get<bool>();
+
+    playersChatData[guid].SetInChat(enabled);
+    playersChatData[guid].SetLastMessage(lastMessage);
+    playersChatData[guid].SetMuteTime(muteTime);
+    playersChatData[guid].SetTotalMutes(totalMutes);
+    playersChatData[guid].SetBanned(banned);
+}
+
+void GlobalChatMgr::SavePlayerData(Player* player)
+{
+    ObjectGuid guid = player->GetGUID();
+    CharacterDatabase.Execute("REPLACE INTO player_globalchat_status (guid,enabled,last_msg,mute_time,total_mutes,banned) VALUES ({},{},{},{},{},{});", guid.GetCounter(), playersChatData[guid].IsInChat(), playersChatData[guid].GetLastMessage(), playersChatData[guid].GetMuteTime(), playersChatData[guid].GetTotalMutes(), playersChatData[guid].IsBanned());
+}
+
 bool GlobalChatMgr::IsInChat(ObjectGuid guid)
 {
     return playersChatData[guid].IsInChat();
@@ -101,11 +134,15 @@ void GlobalChatMgr::Mute(ObjectGuid guid, uint32 duration)
 {
     int64 muteTime = GameTime::GetGameTime().count() + duration;
     playersChatData[guid].SetMuteTime(muteTime);
+    uint32 totalMutes = playersChatData[guid].GetTotalMutes();
+    playersChatData[guid].SetTotalMutes(totalMutes++);
 }
 
 void GlobalChatMgr::Ban(ObjectGuid guid)
 {
     playersChatData[guid].SetBanned(true);
+    uint32 totalMutes = playersChatData[guid].GetTotalMutes();
+    playersChatData[guid].SetTotalMutes(totalMutes++);
 }
 
 void GlobalChatMgr::Unmute(ObjectGuid guid)
