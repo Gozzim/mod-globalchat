@@ -31,16 +31,16 @@ public:
         static ChatCommandTable commandTable =
                 {
                         { "chat",        HandleGlobalChatCommand,        SEC_PLAYER,    Console::Yes },
-                        { "global",      HandleGlobalChatCommand,        SEC_PLAYER,    Console::Yes },
-                        { "g",           HandleGlobalChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "world",      HandleGlobalChatCommand,        SEC_PLAYER,    Console::Yes },
+                        { "w",           HandleGlobalChatCommand,        SEC_PLAYER,    Console::Yes },
                         { "c",           HandleGlobalChatCommand,        SEC_PLAYER,    Console::Yes },
-                        { "joinglobal",  HandleGlobalChatJoinCommand,    SEC_PLAYER,    Console::No },
-                        { "leaveglobal", HandleGlobalChatLeaveCommand,   SEC_PLAYER,    Console::No },
-                        { "gdisable",    HandleGlobalChatDisableCommand, SEC_MODERATOR, Console::Yes },
-                        { "genable",     HandleGlobalChatEnableCommand,  SEC_MODERATOR, Console::Yes },
-                        { "gmute",       HandleMuteGlobalChat,           SEC_MODERATOR, Console::Yes },
-                        { "gunmute",     HandleUnmuteGlobalChat,         SEC_MODERATOR, Console::Yes },
-                        { "ginfo",       HandlePlayerInfoGlobalChat,     SEC_MODERATOR, Console::Yes },
+                        { "joinworld",  HandleGlobalChatJoinCommand,    SEC_PLAYER,    Console::No },
+                        { "leaveworld", HandleGlobalChatLeaveCommand,   SEC_PLAYER,    Console::No },
+                        { "wdisable",    HandleGlobalChatDisableCommand, SEC_MODERATOR, Console::Yes },
+                        { "wenable",     HandleGlobalChatEnableCommand,  SEC_MODERATOR, Console::Yes },
+                        { "wmute",       HandleMuteGlobalChat,           SEC_MODERATOR, Console::Yes },
+                        { "wunmute",     HandleUnmuteGlobalChat,         SEC_MODERATOR, Console::Yes },
+                        { "winfo",       HandlePlayerInfoGlobalChat,     SEC_MODERATOR, Console::Yes },
                 };
 
         return commandTable;
@@ -67,7 +67,7 @@ public:
 
         if (sGlobalChatMgr->GlobalChatEnabled)
         {
-            handler->PSendSysMessage("The GlobalChat is already enabled.");
+            handler->PSendSysMessage("The WorldChat is already enabled.");
             return false;
         }
 
@@ -86,7 +86,7 @@ public:
 
         if (!sGlobalChatMgr->GlobalChatEnabled)
         {
-            handler->PSendSysMessage("The GlobalChat is already disabled.");
+            handler->PSendSysMessage("The WorldChat is already disabled.");
             return false;
         }
 
