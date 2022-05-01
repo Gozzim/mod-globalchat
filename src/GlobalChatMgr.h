@@ -20,12 +20,22 @@
 
 #include "Common.h"
 #include "Chat.h"
+#include "DBCFileLoader.h"
+#include "DBCStores.h"
 #include "GlobalChatData.h"
 #include "Player.h"
 #include <regex>
 #include <unordered_map>
 
 class GlobalChatData;
+
+struct ChatProfanityEntry
+{
+    //uint32      ID;
+    char const* Text;
+    int32       Language;
+};
+char constexpr ChatProfanityEntryfmt[] = "dsi";
 
 class GlobalChatMgr
 {
@@ -52,6 +62,7 @@ public:
     uint32 ProfanityBlockLevel;
     uint32 ProfanityMuteType;
     uint32 ProfanityMute;
+    bool ProfanityFromDBC;
     uint32 URLBlockType;
     uint32 URLBlockLevel;
     uint32 URLMuteType;
@@ -60,12 +71,13 @@ public:
     const std::regex urlRegex = std::regex{ "((?:http|ftp)s?://)?([\\w]*(?::[\\w]*)?@)?((?:(www\\.)?(([a-zA-Z0-9-\\.]{1,256})(\\.[a-zA-Z]{2,63})))|((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)))(:\\d+)?(/[\\w\\.()-/\\\\]*)?((\\?([^#\\s&]+=[^#\\s&]+)(?:&([^#\\s&]+=[^#\\s&]+))*)?(#\\S*)?)?" };
 
     std::vector <std::string> GMColors;
-    std::vector <std::string> ProfanityBlacklist;
+    std::vector <std::regex> ProfanityBlacklist;
     std::vector <std::string> URLWhitelist;
 
     void LoadConfig(bool reload);
     void LoadPlayerData(Player* player);
     void SavePlayerData(Player* player);
+    void LoadProfanityDBC();
 
     bool IsInChat(ObjectGuid guid);
     void Mute(ObjectGuid guid, uint32 duration);

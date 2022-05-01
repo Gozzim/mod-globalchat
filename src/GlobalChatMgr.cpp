@@ -23,6 +23,8 @@
 #include "GlobalChatMgr.h"
 #include "WorldSession.h"
 
+DBCStorage<ChatProfanityEntry> sChatProfanityStore(ChatProfanityEntryfmt);
+
 GlobalChatMgr* GlobalChatMgr::instance()
 {
     static GlobalChatMgr instance;
@@ -51,6 +53,7 @@ void GlobalChatMgr::LoadConfig(bool reload)
     ProfanityBlockLevel = sConfigMgr->GetOption<uint32>("GlobalChat.Profanity.BlockLevel", 0);
     ProfanityMuteType = sConfigMgr->GetOption<uint32>("GlobalChat.Profanity.MuteType", 1);
     ProfanityMute = sConfigMgr->GetOption<uint32>("GlobalChat.Profanity.MuteTime", 30);
+    ProfanityFromDBC = sConfigMgr->GetOption<bool>("GlobalChat.Profanity.FromDBC", false);
     URLBlockType = sConfigMgr->GetOption<uint32>("GlobalChat.URL.BlockType", 1);
     URLBlockLevel = sConfigMgr->GetOption<uint32>("GlobalChat.URL.BlockLevel", 0);
     URLMuteType = sConfigMgr->GetOption<uint32>("GlobalChat.URL.MuteType", 1);
@@ -80,8 +83,10 @@ void GlobalChatMgr::LoadConfig(bool reload)
     std::istringstream ProfanityPhrases(configProfanity);
     while (std::getline(ProfanityPhrases, profanity, ';'))
     {
-        ProfanityBlacklist.push_back(profanity);
+        ProfanityBlacklist.emplace_back(profanity, std::regex::icase | std::regex::optimize);
     }
+    if (ProfanityFromDBC)
+        LoadProfanityDBC();
 
     std::string configUrl = sConfigMgr->GetOption<std::string>("GlobalChat.URL.Whitelist", "");
     std::string url;
@@ -125,6 +130,52 @@ void GlobalChatMgr::SavePlayerData(Player* player)
     CharacterDatabase.Execute("REPLACE INTO player_globalchat_status (guid,enabled,last_msg,mute_time,total_mutes,banned) VALUES ({},{},{},{},{},{});", guid.GetCounter(), playersChatData[guid].IsInChat(), playersChatData[guid].GetLastMessage(), playersChatData[guid].GetMuteTime(), playersChatData[guid].GetTotalMutes(), playersChatData[guid].IsBanned());
 }
 
+void GlobalChatMgr::LoadProfanityDBC()
+{
+    uint32 availableDbcLocales = 0xFFFFFFFF;
+
+    std::string filename = "ChatProfanity.dbc";
+    std::string dbcPath = sWorld->GetDataPath() + "dbc/";
+    std::string dbcFilename = dbcPath + filename;
+
+    if (sChatProfanityStore.Load(dbcFilename.c_str()))
+    {
+        for (uint8 i = 0; i < TOTAL_LOCALES; ++i)
+        {
+            if (!(availableDbcLocales & (1 << i)))
+                continue;
+
+            std::string localizedName(dbcPath);
+            localizedName.append(localeNames[i]);
+            localizedName.push_back('/');
+            localizedName.append(filename);
+
+            if (!sChatProfanityStore.LoadStringsFrom(localizedName.c_str()))
+                availableDbcLocales &= ~(1 << i);             // mark as not available for speedup next checks
+        }
+    }
+
+    std::vector<std::string> tempValidators;
+    for (ChatProfanityEntry const* chatProfanity : sChatProfanityStore)
+    {
+        std::string text = chatProfanity->Text;
+
+        text.erase(remove(text.begin(), text.end(), '{'), text.end());
+        text.erase(remove(text.begin(), text.end(), '}'), text.end());
+        text.erase(remove(text.begin(), text.end(), '\\'), text.end());
+        text.erase(remove(text.begin(), text.end(), '<'), text.end());
+        text.erase(remove(text.begin(), text.end(), '>'), text.end());
+
+        tempValidators.emplace_back(text);
+    }
+
+    std::sort(tempValidators.begin(), tempValidators.end());
+    tempValidators.erase(std::unique(tempValidators.begin(), tempValidators.end()), tempValidators.end());
+
+    for (std::string const& validator : tempValidators)
+        ProfanityBlacklist.emplace_back(validator, std::regex::icase | std::regex::optimize);
+}
+
 bool GlobalChatMgr::IsInChat(ObjectGuid guid)
 {
     return playersChatData[guid].IsInChat();
@@ -153,13 +204,9 @@ void GlobalChatMgr::Unmute(ObjectGuid guid)
 
 bool GlobalChatMgr::HasForbiddenPhrase(std::string message)
 {
-    for (const auto& phrase: ProfanityBlacklist)
-    {
-        if (message.find(phrase) != std::string::npos)
-        {
+    for (std::regex const& regex : ProfanityBlacklist)
+        if (std::regex_search(message, regex))
             return true;
-        }
-    }
 
     return false;
 }
@@ -184,11 +231,21 @@ bool GlobalChatMgr::HasForbiddenURL(std::string message)
 
 std::string GlobalChatMgr::CensorForbiddenPhrase(std::string message)
 {
-    for (const auto& phrase: ProfanityBlacklist)
+    std::ostringstream result;
+    std::smatch match;
+
+    for (std::regex const& regex : ProfanityBlacklist)
     {
-        if (message.find(phrase) != std::string::npos)
+        if (std::regex_search(message, match, regex))
         {
-            message.replace(message.find(phrase), phrase.length(), std::string(phrase.length(), '*'));
+            result << match.prefix();
+
+            if (match.str().size() > 0)
+            {
+                result << std::string(match.str().size(), '*');
+            }
+
+            return result.str() + CensorForbiddenPhrase(match.suffix());
         }
     }
 
