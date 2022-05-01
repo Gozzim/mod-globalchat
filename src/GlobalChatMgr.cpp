@@ -126,12 +126,15 @@ void GlobalChatMgr::LoadPlayerData(Player* player)
 
 void GlobalChatMgr::SavePlayerData(Player* player)
 {
+    LOG_DEBUG("module", "GlobalChat: Saving PlayerData for {}", player->GetName());
     ObjectGuid guid = player->GetGUID();
     CharacterDatabase.Execute("REPLACE INTO player_globalchat_status (guid,enabled,last_msg,mute_time,total_mutes,banned) VALUES ({},{},{},{},{},{});", guid.GetCounter(), playersChatData[guid].IsInChat(), playersChatData[guid].GetLastMessage(), playersChatData[guid].GetMuteTime(), playersChatData[guid].GetTotalMutes(), playersChatData[guid].IsBanned());
 }
 
 void GlobalChatMgr::LoadProfanityDBC()
 {
+    LOG_DEBUG("module", "GlobalChat: Loading ProfanityDBC");
+
     uint32 availableDbcLocales = 0xFFFFFFFF;
 
     std::string filename = "ChatProfanity.dbc";
@@ -561,6 +564,7 @@ std::string GlobalChatMgr::BuildChatContent(std::string text)
 
 void GlobalChatMgr::SendToPlayers(std::string chatMessage, TeamId teamId)
 {
+    LOG_DEBUG("module", "GlobalChat: Sending Message to Players.");
     SessionMap sessions = sWorld->GetAllSessions();
     for (SessionMap::iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
     {
@@ -666,6 +670,7 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message)
         if ((playerSecurity > 0 && ProfanityBlockType != 1) || ProfanityBlockType == 2)
         {
             ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase.");
+            LOG_INFO("module", "GlobalChat: Player {} tried posting a forbidden message.", player->GetName());
             return;
         }
 
@@ -674,6 +679,7 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message)
             if (ProfanityMute > 0)
             {
                 sWorld->SendGMText(17000, playerName, message); // send report to GMs
+                LOG_INFO("module", "GlobalChat: Player {} got muted for {} for posting a forbidden message.", player->GetName(), secsToTimeString(ProfanityMute));
                 ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase. You have been muted for %s.", secsToTimeString(ProfanityMute));
 
                 if (ProfanityMuteType >= 1)
@@ -692,6 +698,7 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message)
             else
             {
                 sWorld->SendGMText(17000, playerName, message); // send report to GMs
+                LOG_INFO("module", "GlobalChat: Player {} tried posting a forbidden message.", player->GetName());
                 ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase.");
             }
 
@@ -709,6 +716,7 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message)
         if ((playerSecurity > 0 && URLBlockType != 1) || URLBlockType == 2)
         {
             ChatHandler(session).PSendSysMessage("Urls are not allowed.");
+            LOG_INFO("module", "GlobalChat: Player {} tried posting a forbidden URL.", player->GetName());
             return;
         }
 
@@ -717,6 +725,7 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message)
             if (URLMute > 0)
             {
                 sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
+                LOG_INFO("module", "GlobalChat: Player {} got muted for {} for posting a forbidden URL.", player->GetName(), secsToTimeString(URLMute));
                 ChatHandler(session).PSendSysMessage("Urls are not allowed. You have been muted for %s.", secsToTimeString(URLMute));
 
                 if (URLMuteType >= 1)
@@ -735,6 +744,7 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message)
             else
             {
                 sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
+                LOG_INFO("module", "GlobalChat: Player {} tried posting a forbidden URL.", player->GetName());
                 ChatHandler(session).PSendSysMessage("Urls are not allowed.");
                 return;
             }
@@ -761,6 +771,7 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message)
     chat_stream << "|cff" << chatColor;
     chat_stream << chatContent;
 
+    LOG_INFO("module", "GlobalChat: Player {}: {}", player->GetName(), chatText);
     SendToPlayers(chat_stream.str(), player->GetTeamId());
 }
 
@@ -784,6 +795,7 @@ void GlobalChatMgr::PlayerJoinCommand(ChatHandler* handler)
     playersChatData[guid].SetInChat(true);
 
     handler->PSendSysMessage("You have joined the GlobalChat.");
+    LOG_INFO("module", "GlobalChat: Player {} joined GlobalChat.", player->GetName());
 }
 
 void GlobalChatMgr::PlayerLeaveCommand(ChatHandler* handler)
@@ -799,6 +811,7 @@ void GlobalChatMgr::PlayerLeaveCommand(ChatHandler* handler)
 
     playersChatData[guid].SetInChat(false);
     handler->PSendSysMessage("You have left the GlobalChat.");
+    LOG_INFO("module", "GlobalChat: Player {} left GlobalChat.", player->GetName());
 }
 
 void GlobalChatMgr::PlayerInfoCommand(ChatHandler* handler, Player* player)

@@ -73,6 +73,8 @@ public:
 
         sGlobalChatMgr->GlobalChatEnabled = true;
         sWorld->SendWorldText(17002, playerName.c_str(), "enabled");
+        LOG_INFO("module", "GlobalChat: Player {} enabled the GlobalChat.", playerName);
+
         return true;
     };
 
@@ -92,6 +94,8 @@ public:
 
         sGlobalChatMgr->GlobalChatEnabled = false;
         sWorld->SendWorldText(17002, playerName.c_str(), "disabled");
+        LOG_INFO("module", "GlobalChat: Player {} disabled the GlobalChat.", playerName);
+
         return true;
     };
 
@@ -134,6 +138,8 @@ public:
         if (atoi(duration.c_str()) < 0)
         {
             sGlobalChatMgr->Ban(guid);
+            LOG_INFO("module", "GlobalChat: Player {} banned {} in GlobalChat.", playerName, target->GetName());
+
             if (sGlobalChatMgr->AnnounceMutes)
             {
                 sWorld->SendWorldText(17004, playerName.c_str(), target->GetName().c_str(), muteReasonStr.c_str());
@@ -149,6 +155,7 @@ public:
 
         uint32 durationSecs = TimeStringToSecs(duration);
         sGlobalChatMgr->Mute(guid, durationSecs);
+        LOG_INFO("module", "GlobalChat: Player {} muted {} for {} in GlobalChat.", playerName, target->GetName(), secsToTimeString(durationSecs, true));
 
         if (sGlobalChatMgr->AnnounceMutes)
         {
@@ -176,6 +183,7 @@ public:
 
         ObjectGuid guid = target->GetGUID();
         sGlobalChatMgr->Unmute(guid);
+        LOG_INFO("module", "GlobalChat: Player {} was unmuted in GlobalChat.", target->GetName());
 
         return true;
     };
