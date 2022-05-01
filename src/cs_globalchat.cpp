@@ -96,42 +96,13 @@ public:
 
     static bool HandleGlobalChatJoinCommand(ChatHandler* handler)
     {
-        Player* player = handler->GetSession()->GetPlayer();
-        uint64 guid = player->GetGUID().GetCounter();
-
-        if (!sGlobalChat->GlobalChatEnabled)
-        {
-            handler->PSendSysMessage("The GlobalChat is currently disabled.");
-            return true;
-        }
-
-        if (sGlobalChat->GlobalChatMap[guid].enabled)
-        {
-            handler->PSendSysMessage("You already joined the GlobalChat.");
-            return true;
-        }
-
-        sGlobalChat->GlobalChatMap[guid].enabled = 1;
-
-        handler->PSendSysMessage("You have joined the GlobalChat.");
+        sGlobalChat->PlayerJoinCommand(handler);
         return true;
     };
 
     static bool HandleGlobalChatLeaveCommand(ChatHandler* handler)
     {
-        Player* player = handler->GetSession()->GetPlayer();
-        uint64 guid = player->GetGUID().GetCounter();
-
-        if (!sGlobalChat->GlobalChatMap[guid].enabled)
-        {
-            handler->PSendSysMessage("You already left the GlobalChat.");
-            return true;
-        }
-
-        sGlobalChat->GlobalChatMap[guid].enabled = 0;
-
-        handler->PSendSysMessage("You have left the GlobalChat.");
-
+        sGlobalChat->PlayerLeaveCommand(handler);
         return true;
     };
 
@@ -150,11 +121,11 @@ public:
             playerName = handler->GetSession()->GetPlayer()->GetName();
 
         std::string muteReasonStr{ muteReason };
-        uint64 guid = target->GetGUID().GetCounter();
+        ObjectGuid guid = target->GetGUID();
 
         if (atoi(duration.c_str()) < 0)
         {
-            sGlobalChat->GlobalChatMap[guid].banned = true;
+            sGlobalChat->Ban(guid);
             if (sGlobalChat->AnnounceMutes)
             {
                 sWorld->SendWorldText(17004, playerName.c_str(), target->GetName().c_str(), muteReasonStr.c_str());
@@ -169,8 +140,8 @@ public:
         }
 
         uint32 durationSecs = TimeStringToSecs(duration);
-        int64 muteTime = GameTime::GetGameTime().count() + durationSecs;
-        sGlobalChat->GlobalChatMap[guid].mute_time = muteTime;
+        sGlobalChat->Mute(guid, durationSecs);
+
         if (sGlobalChat->AnnounceMutes)
         {
             sWorld->SendWorldText(17003, playerName.c_str(), target->GetName().c_str(), secsToTimeString(durationSecs, true).c_str(), muteReasonStr.c_str());
@@ -191,9 +162,9 @@ public:
         if (!target)
             return false;
 
-        uint64 guid = target->GetGUID().GetCounter();
-        sGlobalChat->GlobalChatMap[guid].banned = false;
-        sGlobalChat->GlobalChatMap[guid].mute_time = 0;
+        ObjectGuid guid = target->GetGUID();
+        sGlobalChat->Unmute(guid);
+
         return true;
     };
 };

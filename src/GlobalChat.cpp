@@ -92,6 +92,28 @@ void GlobalChat::LoadConfig(bool reload)
     }
 }
 
+bool GlobalChat::IsInChat(ObjectGuid guid)
+{
+    return playersChatData[guid].IsInChat();
+}
+
+void GlobalChat::Mute(ObjectGuid guid, uint32 duration)
+{
+    int64 muteTime = GameTime::GetGameTime().count() + duration;
+    playersChatData[guid].SetMuteTime(muteTime);
+}
+
+void GlobalChat::Ban(ObjectGuid guid)
+{
+    playersChatData[guid].SetBanned(true);
+}
+
+void GlobalChat::Unmute(ObjectGuid guid)
+{
+    playersChatData[guid].SetBanned(false);
+    playersChatData[guid].SetMuteTime(0);
+}
+
 bool GlobalChat::HasForbiddenPhrase(std::string message)
 {
     for (const auto& phrase: ProfanityBlacklist)
@@ -454,9 +476,9 @@ void GlobalChat::SendToPlayers(std::string chatMessage, TeamId teamId)
         }
 
         Player* target = itr->second->GetPlayer();
-        uint64 guid2 = target->GetGUID().GetCounter();
+        ObjectGuid guid2 = target->GetGUID();
 
-        if (GlobalChatMap[guid2].enabled == 1)
+        if (IsInChat(guid2))
         {
             if (!FactionSpecific || teamId == TEAM_NEUTRAL || teamId == target->GetTeamId())
             {
@@ -494,12 +516,12 @@ void GlobalChat::SendGlobalChat(WorldSession* session, const char* message)
     player = session->GetPlayer();
     nameLink = GetNameLink(player);
 
-    uint64 guid = player->GetGUID().GetCounter();
+    ObjectGuid guid = player->GetGUID();
     const char* playerName = player->GetName().c_str();
     AccountTypes playerSecurity = session->GetSecurity();
 
     // Prevent Spamming first to avoid sending massive amounts of SysMessages as well
-    if (GlobalChatMap[guid].last_msg + CoolDown >= GameTime::GetGameTime().count() && playerSecurity == 0)
+    if (playersChatData[guid].GetLastMessage() + CoolDown >= GameTime::GetGameTime().count() && playerSecurity == 0)
     {
         return;
     }
@@ -510,25 +532,25 @@ void GlobalChat::SendGlobalChat(WorldSession* session, const char* message)
         return;
     }
 
-    if (GlobalChatMap[guid].banned)
+    if (playersChatData[guid].IsBanned())
     {
         ChatHandler(session).PSendSysMessage("|cffff0000You are currently banned from the GlobalChat.|r");
         return;
     }
 
-    if (!player->CanSpeak() || GlobalChatMap[guid].mute_time > GameTime::GetGameTime().count())
+    if (!player->CanSpeak() || playersChatData[guid].GetMuteTime() > GameTime::GetGameTime().count())
     {
         uint32 muteLeft = session->m_muteTime - GameTime::GetGameTime().count();
-        if (GlobalChatMap[guid].mute_time > session->m_muteTime)
+        if (playersChatData[guid].GetMuteTime() > session->m_muteTime)
         {
-            muteLeft = GlobalChatMap[guid].mute_time - GameTime::GetGameTime().count();
+            muteLeft = playersChatData[guid].GetMuteTime() - GameTime::GetGameTime().count();
         }
 
         ChatHandler(session).PSendSysMessage("|cffff0000You can't use the GlobalChat while muted.|r You need to wait another %s.", secsToTimeString(muteLeft));
         return;
     }
 
-    if (!GlobalChatMap[guid].enabled)
+    if (!IsInChat(guid))
     {
         ChatHandler(session).PSendSysMessage("|cffff0000You have not joined the GlobalChat. Type |r.joinglobal|cffff0000 to join the GlobalChat.|r");
         return;
@@ -559,15 +581,15 @@ void GlobalChat::SendGlobalChat(WorldSession* session, const char* message)
             {
                 sWorld->SendGMText(17000, playerName, message); // send report to GMs
                 ChatHandler(session).PSendSysMessage("Your message contains a forbidden phrase. You have been muted for %s.", secsToTimeString(ProfanityMute));
-                int64 muteTime = GameTime::GetGameTime().count() + ProfanityMute;
 
                 if (ProfanityMuteType >= 1)
                 {
-                    GlobalChatMap[guid].mute_time = muteTime;
+                    Mute(guid, ProfanityMute);
                 }
 
                 if (ProfanityMuteType >= 2)
                 {
+                    int64 muteTime = GameTime::GetGameTime().count() + ProfanityMute;
                     LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
                     session->m_muteTime = muteTime;
                     mt->SetData(0, muteTime);
@@ -602,15 +624,15 @@ void GlobalChat::SendGlobalChat(WorldSession* session, const char* message)
             {
                 sWorld->SendGMText(17001, playerName, message); // send passive report to GMs
                 ChatHandler(session).PSendSysMessage("Urls are not allowed. You have been muted for %s.", secsToTimeString(URLMute));
-                int64 muteTime = GameTime::GetGameTime().count() + URLMute; // muted player
 
                 if (URLMuteType >= 1)
                 {
-                    GlobalChatMap[guid].mute_time = muteTime;
+                    Mute(guid, URLMute);
                 }
 
                 if (URLMuteType >= 2)
                 {
+                    int64 muteTime = GameTime::GetGameTime().count() + URLMute;
                     LoginDatabasePreparedStatement* mt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
                     session->m_muteTime = muteTime;
                     mt->SetData(0, muteTime);
@@ -639,11 +661,48 @@ void GlobalChat::SendGlobalChat(WorldSession* session, const char* message)
     chatContent = BuildChatContent(chatText);
 
     // Update last message to avoid sending massive amounts of SysMessages as well
-    GlobalChatMap[player->GetGUID().GetCounter()].last_msg = GameTime::GetGameTime().count();
+    playersChatData[guid].SetLastMessage(GameTime::GetGameTime().count());
 
     chat_stream << chatPrefix << " " << nameLink << ": ";
     chat_stream << "|cff" << chatColor;
     chat_stream << chatContent;
 
     SendToPlayers(chat_stream.str(), player->GetTeamId());
+}
+
+void GlobalChat::PlayerJoinCommand(ChatHandler* handler)
+{
+    Player* player = handler->GetSession()->GetPlayer();
+    ObjectGuid guid = player->GetGUID();
+
+    if (!GlobalChatEnabled)
+    {
+        handler->PSendSysMessage("The GlobalChat is currently disabled.");
+        return;
+    }
+
+    if (IsInChat(guid))
+    {
+        handler->PSendSysMessage("You already joined the GlobalChat.");
+        return;
+    }
+
+    playersChatData[guid].SetInChat(true);
+
+    handler->PSendSysMessage("You have joined the GlobalChat.");
+}
+
+void GlobalChat::PlayerLeaveCommand(ChatHandler* handler)
+{
+    Player* player = handler->GetSession()->GetPlayer();
+    ObjectGuid guid = player->GetGUID();
+
+    if (!IsInChat(guid))
+    {
+        handler->PSendSysMessage("You already left the GlobalChat.");
+        return;
+    }
+
+    playersChatData[guid].SetInChat(false);
+    handler->PSendSysMessage("You have left the GlobalChat.");
 }

@@ -42,12 +42,6 @@ public:
             {
                 ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00GlobalChat |rmodule. Use \".help chat\" to find out how to use it.");
             }
-
-            if (sGlobalChat->EnableOnLogin && sGlobalChat->GlobalChatMap.find(player->GetGUID().GetCounter()) == sGlobalChat->GlobalChatMap.end())
-            {
-                // TODO: Load from db
-                sGlobalChat->GlobalChatMap[player->GetGUID().GetCounter()].enabled = sGlobalChat->EnableOnLogin;
-            }
         }
     }
 

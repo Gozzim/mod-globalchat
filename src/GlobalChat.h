@@ -20,17 +20,12 @@
 
 #include "Common.h"
 #include "Chat.h"
+#include "GlobalChatData.h"
 #include "Player.h"
 #include <regex>
 #include <unordered_map>
 
-typedef struct
-{
-    bool enabled;
-    time_t last_msg;
-    time_t mute_time;
-    bool banned;
-} GlobalChatVars;
+class GlobalChatData;
 
 class GlobalChat
 {
@@ -68,9 +63,12 @@ public:
     std::vector <std::string> ProfanityBlacklist;
     std::vector <std::string> URLWhitelist;
 
-    std::unordered_map <uint32, GlobalChatVars> GlobalChatMap;
-
     void LoadConfig(bool reload);
+
+    bool IsInChat(ObjectGuid guid);
+    void Mute(ObjectGuid guid, uint32 duration);
+    void Unmute(ObjectGuid guid);
+    void Ban(ObjectGuid guid);
 
     bool HasForbiddenPhrase(std::string message);
     bool HasForbiddenURL(std::string message);
@@ -83,15 +81,19 @@ public:
     std::string GetClassColor(Player* player);
     std::string GetRaceIcon(Player* player);
 
-    void MutePlayer(Player* player, int64 seconds, bool global = false);
-
     void SendGlobalChat(WorldSession* session, const char* message);
+
+    void PlayerJoinCommand(ChatHandler* handler);
+    void PlayerLeaveCommand(ChatHandler* handler);
 
 private:
     std::string GetChatPrefix();
     std::string GetNameLink(Player* player);
     std::string BuildChatContent(std::string text);
     void SendToPlayers(std::string chatMessage, TeamId teamId = TEAM_NEUTRAL);
+
+    typedef std::map<ObjectGuid, GlobalChatData> GlobalChatPlayersDataMap;
+    GlobalChatPlayersDataMap playersChatData;
 };
 
 #define sGlobalChat GlobalChat::instance()
