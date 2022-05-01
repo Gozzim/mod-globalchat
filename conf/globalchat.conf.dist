@@ -152,16 +152,26 @@ GlobalChat.JoinChannelAllowed = 0
 GlobalChat.AnnounceMutes = 0
 
 #
-#    GlobalChat.Profanity.Block
+#    GlobalChat.Profanity.BlockType
+#        Description: How to handle players posting Profanities.
+#        Default:     1 - (Censor Profanity)
+#                     2 - (Block Message)
+#                     3 - (Block Message & Mute Player)
+#                     0 - (Disabled)
+#
+
+GlobalChat.Profanity.BlockType = 1
+
+#
+#    GlobalChat.Profanity.BlockLevel
 #        Description: Player Security Level (Rank) to block profanities. Also supports custom levels.
 #        Default:     0  - (Players)
 #                     1  - (Players + Moderators)
 #                     2  - (Players + Moderators + GMs)
 #                     3  - (Players + Moderators + GMs + Admins)
-#                    -1  - (Disabled)
 #
 
-GlobalChat.Profanity.Block = 0
+GlobalChat.Profanity.BlockLevel = 0
 
 #
 #    GlobalChat.Profanity.MuteType
@@ -171,7 +181,7 @@ GlobalChat.Profanity.Block = 0
 #                     0  - (Disabled)
 #
 
-GlobalChat.Profanity.BlockType = 1
+GlobalChat.Profanity.MuteType = 1
 
 #
 #    GlobalChat.Profanity.MuteTime
@@ -192,16 +202,26 @@ GlobalChat.Profanity.MuteTime = 30
 GlobalChat.Profanity.Blacklist = ""
 
 #
-#    GlobalChat.URL.Block (EXPERIMENTAL)
+#    GlobalChat.URL.BlockType
+#        Description: How to handle players posting URLs.
+#        Default:     1 - (Censor URL)
+#                     2 - (Block Message)
+#                     3 - (Block Message & Mute Player)
+#                     0 - (Disabled)
+#
+
+GlobalChat.URL.BlockType = 1
+
+#
+#    GlobalChat.URL.BlockLevel
 #        Description: Player Security Level (Rank) to block URLs. Also supports custom levels.
 #        Default:     0 - (Players)
 #                     1 - (Players + Moderators)
 #                     2 - (Players + Moderators + GMs)
 #                     3 - (Players + Moderators + GMs + Admins)
-#                    -1 - (Disabled)
 #
 
-GlobalChat.URL.Block = 0
+GlobalChat.URL.BlockLevel = 0
 
 #
 #    GlobalChat.URL.MuteType
@@ -211,13 +231,13 @@ GlobalChat.URL.Block = 0
 #                     0  - (Disabled)
 #
 
-GlobalChat.URL.BlockType = 1
+GlobalChat.URL.MuteType = 1
 
 #
 #    GlobalChat.URL.MuteTime
 #        Description: MuteTime when player posts URL. GMs will not get muted.
 #        Default:     120 - (seconds)
-#                     0   - (Only disallow)
+#                     0   - (Disabled)
 #
 
 GlobalChat.URL.MuteTime = 120
