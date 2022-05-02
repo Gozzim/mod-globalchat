@@ -24,6 +24,7 @@
 #include "DBCStores.h"
 #include "GlobalChatData.h"
 #include "Player.h"
+#include "SocialMgr.h"
 #include <regex>
 #include <unordered_map>
 
@@ -56,6 +57,7 @@ public:
     bool EnableOnLogin;
     uint32 MinPlayTime;
     uint32 CoolDown;
+    bool SendIgnored;
     bool JoinChannel;
     bool AnnounceMutes;
     uint32 ProfanityBlockType;
@@ -106,7 +108,7 @@ private:
     std::string GetGMChatPrefix(TeamId teamId);
     std::string GetNameLink(Player* player);
     std::string BuildChatContent(std::string text);
-    void SendToPlayers(std::string chatMessage, TeamId teamId);
+    void SendToPlayers(std::string chatMessage, Player* player, TeamId teamId);
 
     typedef std::map<ObjectGuid, GlobalChatData> GlobalChatPlayersDataMap;
     GlobalChatPlayersDataMap playersChatData;

@@ -47,6 +47,7 @@ void GlobalChatMgr::LoadConfig(bool reload)
     EnableOnLogin = sConfigMgr->GetOption<bool>("GlobalChat.OnFirstLogin", true);
     MinPlayTime = sConfigMgr->GetOption<uint32>("GlobalChat.PlayTimeToChat", 300);
     CoolDown = sConfigMgr->GetOption<uint32>("GlobalChat.CoolDown", 2);
+    SendIgnored = sConfigMgr->GetOption<bool>("GlobalChat.SendToIgnored", false);
     JoinChannel = sConfigMgr->GetOption<bool>("GlobalChat.JoinChannelAllowed", false);
     AnnounceMutes = sConfigMgr->GetOption<bool>("GlobalChat.AnnounceMutes", false);
     ProfanityBlockType = sConfigMgr->GetOption<uint32>("GlobalChat.Profanity.BlockType", 1);
@@ -578,11 +579,12 @@ std::string GlobalChatMgr::BuildChatContent(std::string text)
     return content;
 }
 
-void GlobalChatMgr::SendToPlayers(std::string chatMessage, TeamId teamId)
+void GlobalChatMgr::SendToPlayers(std::string chatMessage, Player* player, TeamId teamId)
 {
     LOG_DEBUG("module", "GlobalChat: Sending Message to Players.");
     std::string chatPrefix = GetChatPrefix();
     std::string gmChatPrefix = GetGMChatPrefix(teamId);
+    ObjectGuid guid = player->GetGUID();
     SessionMap sessions = sWorld->GetAllSessions();
     for (SessionMap::iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
     {
@@ -603,6 +605,10 @@ void GlobalChatMgr::SendToPlayers(std::string chatMessage, TeamId teamId)
                 sWorld->SendServerMessage(SERVER_MSG_STRING, message.c_str(), target);
                 continue;
             }
+
+            // Skip if receiver has sender on ignore
+            if (!SendIgnored && target->GetSocial()->HasIgnore(guid) && player->GetSession()->GetSecurity() == 0)
+                continue;
 
             if (!FactionSpecific || teamId == TEAM_NEUTRAL || teamId == target->GetTeamId())
             {
@@ -634,7 +640,7 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message, T
         chat_stream << "|cff" << chatColor;
         chat_stream << chatContent;
 
-        SendToPlayers(chat_stream.str(), TEAM_NEUTRAL);
+        SendToPlayers(chat_stream.str(), nullptr, TEAM_NEUTRAL);
         return;
     }
 
@@ -800,9 +806,9 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message, T
 
     LOG_INFO("module", "GlobalChat: Player {}: {}", player->GetName(), chatText);
     if (toTeam != TEAM_NEUTRAL)
-        SendToPlayers(chat_stream.str(), toTeam);
+        SendToPlayers(chat_stream.str(), player, toTeam);
     else
-        SendToPlayers(chat_stream.str(), player->GetTeamId());
+        SendToPlayers(chat_stream.str(), player, player->GetTeamId());
 }
 
 void GlobalChatMgr::PlayerJoinCommand(ChatHandler* handler)

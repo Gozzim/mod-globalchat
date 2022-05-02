@@ -134,6 +134,15 @@ GlobalChat.PlayTimeToChat = 300
 GlobalChat.CoolDown = 2
 
 #
+#    GlobalChat.SendToIgnored
+#        Description: Enables sending messages to players even if the sender is ignored by the receiver
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+#
+
+GlobalChat.SendToIgnored = 0
+
+#
 #    GlobalChat.JoinChannelAllowed
 #        Description: Enables /join for GlobalChat
 #        Default:     0	- (Disabled)
