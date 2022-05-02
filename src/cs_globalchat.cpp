@@ -41,6 +41,8 @@ public:
                         { "gmute",       HandleMuteGlobalChat,           SEC_MODERATOR, Console::Yes },
                         { "gunmute",     HandleUnmuteGlobalChat,         SEC_MODERATOR, Console::Yes },
                         { "ginfo",       HandlePlayerInfoGlobalChat,     SEC_MODERATOR, Console::Yes },
+                        { "galliance",   HandleGMAllianceChatCommand,    SEC_MODERATOR, Console::Yes },
+                        { "ghorde",      HandleGMHordeChatCommand,       SEC_MODERATOR, Console::Yes },
                 };
 
         return commandTable;
@@ -52,7 +54,34 @@ public:
             return false;
 
         WorldSession* session = handler->GetSession();
+
+        if (sGlobalChatMgr->FactionSpecific && session->GetSecurity() > 0)
+        {
+            handler->PSendSysMessage("Please use |cff4CFF00.galliance|r or .|cff4CFF00ghorde|r for the GlobalChat as GM.");
+            return true;
+        }
+
         sGlobalChatMgr->SendGlobalChat(session, message.data());
+        return true;
+    }
+
+    static bool HandleGMAllianceChatCommand(ChatHandler* handler, Tail message)
+    {
+        if (message.empty())
+            return false;
+
+        WorldSession* session = handler->GetSession();
+        sGlobalChatMgr->SendGlobalChat(session, message.data(), TEAM_ALLIANCE);
+        return true;
+    }
+
+    static bool HandleGMHordeChatCommand(ChatHandler* handler, Tail message)
+    {
+        if (message.empty())
+            return false;
+
+        WorldSession* session = handler->GetSession();
+        sGlobalChatMgr->SendGlobalChat(session, message.data(), TEAM_HORDE);
         return true;
     }
 

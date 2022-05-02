@@ -485,6 +485,22 @@ std::string GlobalChatMgr::GetChatPrefix()
     return chatPrefix.str();
 }
 
+std::string GlobalChatMgr::GetGMChatPrefix(TeamId teamId)
+{
+    std::ostringstream chatPrefix;
+    std::string factionColor = teamId == TEAM_ALLIANCE ? "3399FF" : "CC0000";
+    std::string factionName = teamId == TEAM_ALLIANCE ? "Alliance" : "Horde";
+    std::string factionCommand = teamId == TEAM_ALLIANCE ? ".galliance" : ".ghorde";
+
+    chatPrefix << "|Hchannel:";
+    chatPrefix << "s " << factionCommand << " ";
+    chatPrefix << "|h|cff" << factionColor;
+    chatPrefix << "[" << factionName << "]|h";
+    chatPrefix << "|cff" << (ChatNameColor.empty() ? "FFFF00" : ChatNameColor);
+
+    return chatPrefix.str();
+}
+
 std::string GlobalChatMgr::GetNameLink(Player* player)
 {
     std::ostringstream nameLink;
@@ -565,6 +581,8 @@ std::string GlobalChatMgr::BuildChatContent(std::string text)
 void GlobalChatMgr::SendToPlayers(std::string chatMessage, TeamId teamId)
 {
     LOG_DEBUG("module", "GlobalChat: Sending Message to Players.");
+    std::string chatPrefix = GetChatPrefix();
+    std::string gmChatPrefix = GetGMChatPrefix(teamId);
     SessionMap sessions = sWorld->GetAllSessions();
     for (SessionMap::iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
     {
@@ -575,23 +593,31 @@ void GlobalChatMgr::SendToPlayers(std::string chatMessage, TeamId teamId)
 
         Player* target = itr->second->GetPlayer();
         ObjectGuid guid2 = target->GetGUID();
+        std::string message;
 
         if (IsInChat(guid2))
         {
+            if (FactionSpecific && teamId != TEAM_NEUTRAL && itr->second->GetSecurity() > 0)
+            {
+                message = gmChatPrefix + " " + chatMessage;
+                sWorld->SendServerMessage(SERVER_MSG_STRING, message.c_str(), target);
+                continue;
+            }
+
             if (!FactionSpecific || teamId == TEAM_NEUTRAL || teamId == target->GetTeamId())
             {
-                sWorld->SendServerMessage(SERVER_MSG_STRING, chatMessage.c_str(), target);
+                message = chatPrefix + " " + chatMessage;
+                sWorld->SendServerMessage(SERVER_MSG_STRING, message.c_str(), target);
             }
         }
     }
 }
 
-void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message)
+void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message, TeamId toTeam)
 {
     Player* player;
 
     std::string nameLink;
-    std::string chatPrefix = GetChatPrefix();
     std::string chatText = message;
     std::string chatContent;
 
@@ -600,6 +626,7 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message)
 
     if (!session)
     {
+        std::string chatPrefix = GetChatPrefix();
         nameLink = GetNameLink(nullptr);
         chatContent = BuildChatContent(chatText);
 
@@ -607,7 +634,7 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message)
         chat_stream << "|cff" << chatColor;
         chat_stream << chatContent;
 
-        SendToPlayers(chat_stream.str());
+        SendToPlayers(chat_stream.str(), TEAM_NEUTRAL);
         return;
     }
 
@@ -767,12 +794,15 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message)
     // Update last message to avoid sending massive amounts of SysMessages as well
     playersChatData[guid].SetLastMessage(GameTime::GetGameTime().count());
 
-    chat_stream << chatPrefix << " " << nameLink << ": ";
+    chat_stream << nameLink << ": ";
     chat_stream << "|cff" << chatColor;
     chat_stream << chatContent;
 
     LOG_INFO("module", "GlobalChat: Player {}: {}", player->GetName(), chatText);
-    SendToPlayers(chat_stream.str(), player->GetTeamId());
+    if (toTeam != TEAM_NEUTRAL)
+        SendToPlayers(chat_stream.str(), toTeam);
+    else
+        SendToPlayers(chat_stream.str(), player->GetTeamId());
 }
 
 void GlobalChatMgr::PlayerJoinCommand(ChatHandler* handler)

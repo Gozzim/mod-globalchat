@@ -9,12 +9,13 @@ Advanced GlobalChat with detailed options to configure individually
 ## Features
 
 - Enable/Disable Chat per command
+- Players can join and leave the chat
+- Enable/Disable Faction specific chats
 - Set Chat Name/NameColor/TextColor
 - Configure Class/Race/Faction Icons to your need
 - Spam Protection
 - URL Filters/Censoring
 - Profanity Filters/Censoring
-- Players can join and leave the chat
 - Support for custom GM ranks
 - And many more options
 
@@ -32,6 +33,7 @@ Advanced GlobalChat with detailed options to configure individually
 - `.gmute` - Mute a player in the GlobalChat for a certain amount of time or permanently
 - `.gunmute` - Unmute a player in the GlobalChat
 - `.ginfo` - Get information about player (Mutes, etc.)
+- `.galliance` or `.ghorde` - Chat in Faction GlobalChat (if Faction specific chats are enabled)
 
 ## Installation
 ```

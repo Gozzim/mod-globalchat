@@ -95,7 +95,7 @@ public:
     std::string GetClassColor(Player* player);
     std::string GetRaceIcon(Player* player);
 
-    void SendGlobalChat(WorldSession* session, const char* message);
+    void SendGlobalChat(WorldSession* session, const char* message, TeamId toTeam = TEAM_NEUTRAL);
 
     void PlayerJoinCommand(ChatHandler* handler);
     void PlayerLeaveCommand(ChatHandler* handler);
@@ -103,9 +103,10 @@ public:
 
 private:
     std::string GetChatPrefix();
+    std::string GetGMChatPrefix(TeamId teamId);
     std::string GetNameLink(Player* player);
     std::string BuildChatContent(std::string text);
-    void SendToPlayers(std::string chatMessage, TeamId teamId = TEAM_NEUTRAL);
+    void SendToPlayers(std::string chatMessage, TeamId teamId);
 
     typedef std::map<ObjectGuid, GlobalChatData> GlobalChatPlayersDataMap;
     GlobalChatPlayersDataMap playersChatData;

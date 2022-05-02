@@ -9,7 +9,7 @@ INSERT INTO `acore_string` (`entry`, `content_default`, `locale_koKR`, `locale_f
 (17005, '|cffff0000You have been muted for %s in the GlobalChat.|r Reason: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (17006, '|cffff0000You have been permanently muted in the GlobalChat.|r Reason: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);                                                                                                                                                                           ;
 
-DELETE FROM `command` WHERE `name` IN ('global','g','chat','c','joinglobal','leaveglobal','genable','gdisable','gmute','gunmute','ginfo');
+DELETE FROM `command` WHERE `name` IN ('global','g','chat','c','joinglobal','leaveglobal','genable','gdisable','gmute','gunmute','ginfo','galliance','ghorde');
 INSERT INTO `command` (`name`, `security`, `help`) VALUES
 ('global', 0, 'Syntax: .global $text\nWrite a message in the GlobalChat.\nAdditional commands: .joinglobal & .leaveglobal'),
 ('g', 0, 'Syntax: .g $text\nWrite a message in the GlobalChat.\nAdditional commands: .joinglobal & .leaveglobal'),
@@ -21,4 +21,6 @@ INSERT INTO `command` (`name`, `security`, `help`) VALUES
 ('genable', 1, 'Enables GlobalChat.'),
 ('gdisable', 1, 'Disables GlobalChat.'),
 ('gmute', 1, 'Syntax: $playername $bantime $reason\nMutes a player in the GlobalChat\n$bantime: Negative values lead to perment mute. Otherwise use a timestring like "1d2h30s".'),
-('gunmute', 1, 'Syntax: $playername\nUnmutes player in the GlobalChat.');
+('gunmute', 1, 'Syntax: $playername\nUnmutes player in the GlobalChat.'),
+('galliance', 1, 'Syntax: .galliance $text\nWrite a message in the Alliance GlobalChat.'),
+('ghorde', 1, 'Syntax: .ghorde $text\nWrite a message in the Horde GlobalChat.');
