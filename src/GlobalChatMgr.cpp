@@ -828,7 +828,7 @@ void GlobalChatMgr::PlayerInfoCommand(ChatHandler* handler, Player* player)
     std::string lastMsgStr = Acore::Time::TimeToTimestampStr(Seconds(lastMessage));
 
     handler->PSendSysMessage("GlobalChat information about player |cff4CFF00%s|r", player->GetName().c_str());
-    handler->PSendSysMessage("> In Chat: %s || Last Message: %s ", inChat ? "|cff4CFF00Yes|r" : "|cffFF0000No|r", lastMsgStr);
-    handler->PSendSysMessage("> Muted: %s || Mute Time: %s", isMuted ? "|cffFF0000Yes|r" : "|cff4CFF00No|r", isMuted ? secsToTimeString(muteTime - GameTime::GetGameTime().count(), true).c_str() : "0");
-    handler->PSendSysMessage("> Total Mutes: %u || Banned: %s", totalMutes, isBanned ? "|cffFF0000Yes|r" : "|cff4CFF00No|r");
+    handler->PSendSysMessage("> In Chat: %s || Last Message: %s ", inChat ? "|cff4CFF00Yes|r" : "|cffFF0000No|r", lastMessage ? ("|cff4CFF00" + lastMsgStr + "|r") : "|cffFF0000Never|r");
+    handler->PSendSysMessage("> Muted: %s || Mute Time: %s", isMuted ? "|cffFF0000Yes|r" : "|cff4CFF00No|r", isMuted ? ("|cffFF0000" + secsToTimeString(muteTime - GameTime::GetGameTime().count(), true) + "|r") : "|cff4CFF000s|r");
+    handler->PSendSysMessage("> Total Mutes: %s%u|r || Banned: %s", totalMutes > 0 ? "|cffFF0000" : "|cff4CFF00", totalMutes, isBanned ? "|cffFF0000Yes|r" : "|cff4CFF00No|r");
 }
