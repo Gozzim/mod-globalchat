@@ -68,6 +68,13 @@ public:
     {
         if (sGlobalChatMgr->JoinChannel && !sGlobalChatMgr->ChatName.empty() && lang != LANG_ADDON && !strcmp(channel->GetName().c_str(), sGlobalChatMgr->ChatName.c_str()))
         {
+            if (sGlobalChatMgr->FactionSpecific && player->GetSession()->GetSecurity() > 0)
+            {
+                ChatHandler(player->GetSession()).PSendSysMessage("Please use |cff4CFF00.galliance|r or .|cff4CFF00ghorde|r for the GlobalChat as GM.");
+                msg = -1;
+                return;
+            }
+
             sGlobalChatMgr->SendGlobalChat(player->GetSession(), msg.c_str());
             msg = -1;
         }
