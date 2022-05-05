@@ -4,7 +4,8 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/gozzim/mod-globalchat/badge)](https://www.codefactor.io/repository/github/gozzim/mod-globalchat)
 
 ## Description
-Advanced GlobalChat with detailed options to configure individually 
+**Advanced GlobalChat** with around **30 configuration options**.
+This GlobalChat allows you to configure the module to your individual needs!
 
 ## Features
 
@@ -17,7 +18,7 @@ Advanced GlobalChat with detailed options to configure individually
 - URL Filters/Censoring
 - Profanity Filters/Censoring
 - Support for custom GM ranks
-- And many more options
+- And a total of almost **30 Configuration Options** to customize the Chat to your needs!
 
 ## Commands
 
