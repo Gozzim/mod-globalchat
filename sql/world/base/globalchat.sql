@@ -26,5 +26,5 @@ INSERT INTO `command` (`name`, `security`, `help`) VALUES
 ('ghorde', 1, 'Syntax: .ghorde $text\nWrite a message in the Horde GlobalChat.'),
 ('gblacklist', 1, 'Type .gblacklist to see the list of possible subcommands or .help gblacklist $subcommand to see info on subcommands.'),
 ('gblacklist add', 1, 'Syntax: .gblacklist add $text\nAdds a phrase to the GlobalChat Profanity Blacklist.'),
-('gblacklist remove', 1, 'Syntax: .galliance $text\nRemoves a phrase from the GlobalChat Profanity Blacklist.'),
+('gblacklist remove', 1, 'Syntax: .gblacklist remove $text\nRemoves a phrase from the GlobalChat Profanity Blacklist.'),
 ('gblacklist reload', 1, 'Reloads the GlobalChat Profanity Blacklist.');
