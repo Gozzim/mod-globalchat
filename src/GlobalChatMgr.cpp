@@ -79,13 +79,7 @@ void GlobalChatMgr::LoadConfig(bool reload)
     // Do not remove this
     GMColors.push_back("000000");
 
-    std::string configProfanity = sConfigMgr->GetOption<std::string>("GlobalChat.Profanity.Blacklist", "");
-    std::string profanity;
-    std::istringstream ProfanityPhrases(configProfanity);
-    while (std::getline(ProfanityPhrases, profanity, ';'))
-    {
-        ProfanityBlacklist[profanity] = std::regex{profanity, std::regex::icase | std::regex::optimize};
-    }
+    LoadBlacklistDB();
     if (ProfanityFromDBC)
         LoadProfanityDBC();
 
@@ -130,6 +124,21 @@ void GlobalChatMgr::SavePlayerData(Player* player)
     LOG_DEBUG("module", "GlobalChat: Saving PlayerData for {}", player->GetName());
     ObjectGuid guid = player->GetGUID();
     CharacterDatabase.Execute("REPLACE INTO player_globalchat_status (guid,enabled,last_msg,mute_time,total_mutes,banned) VALUES ({},{},{},{},{},{});", guid.GetCounter(), playersChatData[guid].IsInChat(), playersChatData[guid].GetLastMessage(), playersChatData[guid].GetMuteTime(), playersChatData[guid].GetTotalMutes(), playersChatData[guid].IsBanned());
+}
+
+void GlobalChatMgr::LoadBlacklistDB()
+{
+    QueryResult blacklist = CharacterDatabase.Query("SELECT phrase FROM `globalchat_blacklist`");
+
+    if (!blacklist)
+        return;
+
+    do
+    {
+        Field* field = blacklist->Fetch();
+        std::string phrase = field[0].Get<std::string>();
+        ProfanityBlacklist[phrase] = std::regex{phrase, std::regex::icase | std::regex::optimize};
+    } while (blacklist->NextRow());
 }
 
 void GlobalChatMgr::LoadProfanityDBC()

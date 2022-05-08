@@ -202,15 +202,6 @@ GlobalChat.Profanity.MuteType = 1
 GlobalChat.Profanity.MuteTime = 30
 
 #
-#    GlobalChat.Profanity.Blacklist
-#        Description: Blacklisted phrases separated by Semicolons (;)
-#           Example:  "hello;bye;see you;"
-#        Default:     "" - (Disabled)
-#
-
-GlobalChat.Profanity.Blacklist = ""
-
-#
 #    GlobalChat.Profanity.FromDBC
 #        Description: Load profanities from DBC
 #        Default:     0	- (Disabled)

@@ -80,6 +80,7 @@ public:
     void LoadConfig(bool reload);
     void LoadPlayerData(Player* player);
     void SavePlayerData(Player* player);
+    void LoadBlacklistDB();
     void LoadProfanityDBC();
 
     bool IsInChat(ObjectGuid guid);

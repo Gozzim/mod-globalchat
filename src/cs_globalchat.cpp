@@ -18,6 +18,7 @@
 #include "GameTime.h"
 #include "ScriptMgr.h"
 #include "GlobalChatMgr.h"
+#include <regex>
 
 using namespace Acore::ChatCommands;
 
@@ -28,6 +29,13 @@ public:
 
     ChatCommandTable GetCommands() const override
     {
+        static ChatCommandTable blacklistCommandTable =
+                {
+                        { "add",      HandleBlacklistAddCommand,         SEC_MODERATOR, Console::Yes },
+                        { "remove",   HandleBlacklistRemoveCommand,      SEC_MODERATOR, Console::Yes },
+                        { "reload",   HandleBlacklistReloadCommand,      SEC_MODERATOR, Console::Yes },
+                };
+
         static ChatCommandTable commandTable =
                 {
                         { "chat",        HandleGlobalChatCommand,        SEC_PLAYER,    Console::Yes },
@@ -43,6 +51,7 @@ public:
                         { "ginfo",       HandlePlayerInfoGlobalChat,     SEC_MODERATOR, Console::Yes },
                         { "galliance",   HandleGMAllianceChatCommand,    SEC_MODERATOR, Console::Yes },
                         { "ghorde",      HandleGMHordeChatCommand,       SEC_MODERATOR, Console::Yes },
+                        { "gblacklist",  blacklistCommandTable },
                 };
 
         return commandTable;
@@ -57,7 +66,8 @@ public:
 
         if (sGlobalChatMgr->FactionSpecific && session->GetSecurity() > 0)
         {
-            handler->PSendSysMessage("Please use |cff4CFF00.galliance|r or .|cff4CFF00ghorde|r for the GlobalChat as GM.");
+            handler->SendSysMessage("Please use |cff4CFF00.galliance|r or .|cff4CFF00ghorde|r for the GlobalChat as GM.");
+            handler->SetSentErrorMessage(true);
             return true;
         }
 
@@ -96,8 +106,9 @@ public:
 
         if (sGlobalChatMgr->GlobalChatEnabled)
         {
-            handler->PSendSysMessage("The GlobalChat is already enabled.");
-            return false;
+            handler->SendSysMessage("The GlobalChat is already enabled.");
+            handler->SetSentErrorMessage(true);
+            return true;
         }
 
         sGlobalChatMgr->GlobalChatEnabled = true;
@@ -117,8 +128,9 @@ public:
 
         if (!sGlobalChatMgr->GlobalChatEnabled)
         {
-            handler->PSendSysMessage("The GlobalChat is already disabled.");
-            return false;
+            handler->SendSysMessage("The GlobalChat is already disabled.");
+            handler->SetSentErrorMessage(true);
+            return true;
         }
 
         sGlobalChatMgr->GlobalChatEnabled = false;
@@ -156,7 +168,11 @@ public:
             return false;
 
         if (handler->GetSession() && handler->GetSession()->GetSecurity() <= target->GetSession()->GetSecurity())
-            return false;
+        {
+            handler->SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
+            handler->SetSentErrorMessage(true);
+            return true;
+        }
 
         if (handler->GetSession())
             playerName = handler->GetSession()->GetPlayer()->GetName();
@@ -233,6 +249,62 @@ public:
 
         Player* target = player->GetConnectedPlayer();
         sGlobalChatMgr->PlayerInfoCommand(handler, target);
+
+        return true;
+    };
+
+    static bool HandleBlacklistAddCommand(ChatHandler* handler, Tail phrase)
+    {
+        if (phrase.empty())
+            return false;
+
+        QueryResult check = CharacterDatabase.Query("SELECT * FROM `globalchat_blacklist` WHERE `phrase` = '{}'", phrase);
+        if (check)
+        {
+            handler->SendSysMessage("Phrase is already blacklisted.");
+            handler->SetSentErrorMessage(true);
+            return true;
+        }
+
+        CharacterDatabase.Query("INSERT INTO `globalchat_blacklist` VALUES ('{}')", phrase);
+        sGlobalChatMgr->ProfanityBlacklist[phrase.data()] = std::regex{phrase.data(), std::regex::icase | std::regex::optimize};
+        handler->PSendSysMessage("Phrase '%s' is now blacklisted in the GlobalChat.", phrase);
+        LOG_INFO("module", "GlobalChat: Phrase '{}' is now blacklisted.", phrase);
+
+        return true;
+    };
+
+    static bool HandleBlacklistRemoveCommand(ChatHandler* handler, Tail phrase)
+    {
+        if (phrase.empty())
+            return false;
+
+        QueryResult check = CharacterDatabase.Query("SELECT * FROM `globalchat_blacklist` WHERE `phrase` = '{}'", phrase);
+        if (!check)
+        {
+            handler->SendSysMessage("Phrase is not blacklisted.");
+            handler->SetSentErrorMessage(true);
+            return true;
+        }
+
+        CharacterDatabase.Query("DELETE FROM `globalchat_blacklist` WHERE `phrase` = '{}'", phrase);
+        sGlobalChatMgr->ProfanityBlacklist.erase(phrase.data());
+        handler->PSendSysMessage("Phrase '%s' is no longer blacklisted in the GlobalChat.", phrase);
+        LOG_INFO("module", "GlobalChat: Phrase '{}' is no longer blacklisted.", phrase);
+
+        return true;
+    };
+
+    static bool HandleBlacklistReloadCommand(ChatHandler* handler)
+    {
+        sGlobalChatMgr->ProfanityBlacklist.clear();
+        sGlobalChatMgr->LoadBlacklistDB();
+
+        if (sGlobalChatMgr->ProfanityFromDBC)
+            sGlobalChatMgr->LoadProfanityDBC();
+
+        handler->SendSysMessage("GlobalChat Blacklist reloaded.");
+        LOG_INFO("module", "GlobalChat: Profanity Blacklist reloaded.");
 
         return true;
     };

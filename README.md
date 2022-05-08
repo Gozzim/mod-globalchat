@@ -35,6 +35,7 @@ This GlobalChat allows you to configure the module to your individual needs!
 - `.gunmute` - Unmute a player in the GlobalChat
 - `.ginfo` - Get information about player (Mutes, etc.)
 - `.galliance` or `.ghorde` - Chat in Faction GlobalChat (if Faction specific chats are enabled)
+- `.gblacklist` - Add, Remove or Reload Phrases to and from the Blacklisted Profanities in the GlobalChat
 
 ## Installation
 ```
