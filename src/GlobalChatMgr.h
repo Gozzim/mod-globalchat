@@ -72,8 +72,9 @@ public:
 
     const std::regex urlRegex = std::regex{ "((?:http|ftp)s?://)?([\\w]*(?::[\\w]*)?@)?((?:(www\\.)?(([a-zA-Z0-9-\\.]{1,256})(\\.[a-zA-Z]{2,63})))|((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)))(:\\d+)?(/[\\w\\.()-/\\\\]*)?((\\?([^#\\s&]+=[^#\\s&]+)(?:&([^#\\s&]+=[^#\\s&]+))*)?(#\\S*)?)?" };
 
+    typedef std::unordered_map<std::string, std::regex> ProfanityRegexMap;
+    ProfanityRegexMap ProfanityBlacklist;
     std::vector <std::string> GMColors;
-    std::vector <std::regex> ProfanityBlacklist;
     std::vector <std::string> URLWhitelist;
 
     void LoadConfig(bool reload);

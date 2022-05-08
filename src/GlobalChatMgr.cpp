@@ -84,7 +84,7 @@ void GlobalChatMgr::LoadConfig(bool reload)
     std::istringstream ProfanityPhrases(configProfanity);
     while (std::getline(ProfanityPhrases, profanity, ';'))
     {
-        ProfanityBlacklist.emplace_back(profanity, std::regex::icase | std::regex::optimize);
+        ProfanityBlacklist[profanity] = std::regex{profanity, std::regex::icase | std::regex::optimize};
     }
     if (ProfanityFromDBC)
         LoadProfanityDBC();
@@ -159,7 +159,6 @@ void GlobalChatMgr::LoadProfanityDBC()
         }
     }
 
-    std::vector<std::string> tempValidators;
     for (ChatProfanityEntry const* chatProfanity : sChatProfanityStore)
     {
         std::string text = chatProfanity->Text;
@@ -170,14 +169,8 @@ void GlobalChatMgr::LoadProfanityDBC()
         text.erase(remove(text.begin(), text.end(), '<'), text.end());
         text.erase(remove(text.begin(), text.end(), '>'), text.end());
 
-        tempValidators.emplace_back(text);
+        ProfanityBlacklist[text] = std::regex{text, std::regex::icase | std::regex::optimize};
     }
-
-    std::sort(tempValidators.begin(), tempValidators.end());
-    tempValidators.erase(std::unique(tempValidators.begin(), tempValidators.end()), tempValidators.end());
-
-    for (std::string const& validator : tempValidators)
-        ProfanityBlacklist.emplace_back(validator, std::regex::icase | std::regex::optimize);
 }
 
 bool GlobalChatMgr::IsInChat(ObjectGuid guid)
@@ -208,8 +201,8 @@ void GlobalChatMgr::Unmute(ObjectGuid guid)
 
 bool GlobalChatMgr::HasForbiddenPhrase(std::string message)
 {
-    for (std::regex const& regex : ProfanityBlacklist)
-        if (std::regex_search(message, regex))
+    for (auto const& regex : ProfanityBlacklist)
+        if (std::regex_search(message, regex.second))
             return true;
 
     return false;
@@ -238,9 +231,9 @@ std::string GlobalChatMgr::CensorForbiddenPhrase(std::string message)
     std::ostringstream result;
     std::smatch match;
 
-    for (std::regex const& regex : ProfanityBlacklist)
+    for (auto const& regex : ProfanityBlacklist)
     {
-        if (std::regex_search(message, match, regex))
+        if (std::regex_search(message, match, regex.second))
         {
             result << match.prefix();
 
