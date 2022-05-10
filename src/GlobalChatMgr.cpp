@@ -37,7 +37,7 @@ void GlobalChatMgr::LoadConfig(bool reload)
     Announce = sConfigMgr->GetOption<bool>("GlobalChat.Announce", true);
     ChatName = sConfigMgr->GetOption<std::string>("GlobalChat.Chat.Name", "Global");
     ChatNameColor = sConfigMgr->GetOption<std::string>("GlobalChat.Chat.NameColor", "FFFF00");
-    ChatTextColor = sConfigMgr->GetOption<std::string>("GlobalChat.Chat.TextColor", "");
+    ChatTextColor = sConfigMgr->GetOption<std::string>("GlobalChat.Chat.TextColor", "FFFFFF");
     PlayerColor = sConfigMgr->GetOption<uint32>("GlobalChat.Player.NameColor", 1);
     FactionIcon = sConfigMgr->GetOption<bool>("GlobalChat.Player.FactionIcon", false);
     RaceIcon = sConfigMgr->GetOption<bool>("GlobalChat.Player.RaceIcon", true);
@@ -60,6 +60,19 @@ void GlobalChatMgr::LoadConfig(bool reload)
     URLMuteType = sConfigMgr->GetOption<uint32>("GlobalChat.URL.MuteType", 1);
     URLMute = sConfigMgr->GetOption<uint32>("GlobalChat.URL.MuteTime", 120);
 
+    // Checking Hex ColorCodes for validity
+    if (!isValidHexColorCode(ChatNameColor))
+    {
+        LOG_ERROR("module", "GlobalChat: ChatNameColor is not a valid HexColorCode - Falling back to default");
+        ChatNameColor = "FFFF00";
+    }
+
+    if (!isValidHexColorCode(ChatTextColor))
+    {
+        LOG_ERROR("module", "GlobalChat: ChatTextColor is not a valid HexColorCode - Falling back to default");
+        ChatTextColor = "FFFFFF";
+    }
+
     if (reload)
     {
         GMColors.clear();
@@ -68,16 +81,42 @@ void GlobalChatMgr::LoadConfig(bool reload)
     }
 
     std::string configColors = sConfigMgr->GetOption<std::string>("GlobalChat.GM.Colors", "00FF00;091FE0;FF0000");
-    // Do not remove this
-    GMColors.push_back("808080");
     std::string color;
     std::istringstream colors(configColors);
     while (std::getline(colors, color, ';'))
     {
+        LOG_DEBUG("module", "GlobalChat: GMColor at position '{}' has length {} and value '{}' - isEmpty: {}", GMColors.size(), color.size(), color, color.empty());
+        if (color.empty())
+        {
+            LOG_WARN("module", "GlobalChat: GMColor at position '{}' is empty - Falling back to configured PlayerNameColor", GMColors.size());
+            GMColors.push_back(color);
+            continue;
+        }
+
+        if (!isValidHexColorCode(color))
+        {
+            LOG_ERROR("module", "GlobalChat: GMColor at position '{}' is not a valid HexColorCode - Falling back to default GM Colors", GMColors.size());
+            switch (GMColors.size())
+            {
+                case 0:
+                    GMColors.push_back("00FF00");
+                    break;
+                case 1:
+                    GMColors.push_back("091FE0");
+                    break;
+                default:
+                    GMColors.push_back("FF0000");
+                    break;
+            }
+            continue;
+        }
+
         GMColors.push_back(color);
     }
-    // Do not remove this
-    GMColors.push_back("000000");
+
+    // Do not remove these lines
+    GMColors.insert(GMColors.begin(), ChatNameColor);
+    GMColors.push_back("808080");
 
     LoadBlacklistDB();
     if (ProfanityFromDBC)
@@ -185,6 +224,20 @@ void GlobalChatMgr::LoadProfanityDBC()
 bool GlobalChatMgr::IsInChat(ObjectGuid guid)
 {
     return playersChatData[guid].IsInChat();
+}
+
+bool GlobalChatMgr::isValidHexColorCode(std::string color)
+{
+    if (color.length() != 6 )
+        return false;
+
+    for (const char& c : color)
+    {
+        if (!isxdigit(c))
+            return false;
+    }
+
+    return true;
 }
 
 void GlobalChatMgr::Mute(ObjectGuid guid, uint32 duration)
@@ -510,7 +563,8 @@ std::string GlobalChatMgr::GetNameLink(Player* player)
 
     if (!player)
     {
-        nameLink << "[|cff000000Console";
+        nameLink << "[|cff" << (GMColors.size() > 0 ? GMColors.back() : "808080");
+        nameLink << "Console";
         nameLink << "|cff" << (ChatNameColor.empty() ? "FFFF00" : ChatNameColor) << "]";
         return nameLink.str();
     }
@@ -549,7 +603,11 @@ std::string GlobalChatMgr::GetNameLink(Player* player)
 
         if (GMColors.size() > 2 && playerSecurity < GMColors.size())
         {
-            color = GMColors[playerSecurity];
+            std::string gmColor = GMColors[playerSecurity];
+            if (isValidHexColorCode(gmColor))
+            {
+                color = gmColor;
+            }
         }
     }
 

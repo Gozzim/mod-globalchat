@@ -80,6 +80,12 @@ GlobalChat.Player.ClassIcon = 0
 #
 #    GlobalChat.GM.Colors
 #        Description: Colors for names of GMs in GlobalChat. Ordered by Rank, starting at 1.
+#                     If a Rank should not have a GMColor, leave it empty.
+#            Examples: "00FF00;091FE0;FF0000"
+#                      "0000FF;FF0000;000000"
+#                      "00FF00;;FF0000"
+#                      ";091FE0;FF0000"
+#
 #        Default:     "00FF00;091FE0;FF0000"
 #                     "" - (Disabled)
 #

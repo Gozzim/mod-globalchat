@@ -106,6 +106,7 @@ public:
     void PlayerInfoCommand(ChatHandler* handler, Player* player);
 
 private:
+    bool isValidHexColorCode(std::string color);
     std::string GetChatPrefix();
     std::string GetGMChatPrefix(TeamId teamId);
     std::string GetNameLink(Player* player);
