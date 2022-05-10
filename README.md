@@ -19,7 +19,7 @@ This GlobalChat allows you to configure the module to your individual needs!
 - Configure Class/Race/Faction Icons to your need
 - Spam Protection
 - URL Filters/Censoring
-- Obscenity Filters/Censoring
+- Offensive language Filters/Censoring
 - Support for custom GM ranks
 - Information of players having left or joined the Chat, their Mutes and Bans in the GlobalChat is saved and loaded.
 - And a total of almost **30 Configuration Options** to customize the Chat to your needs!
@@ -45,11 +45,11 @@ This GlobalChat allows you to configure the module to your individual needs!
 
 ## Screenshots
 
-|                                                                       Chat Customization                                                                        |                                                                              **Faction Specific Chat**                                                                               |
-|:---------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| *Chat Name & Prefix* ![Url](/images/ChatPrefix.jpg) <br/> *Player Icons* ![Icons](/images/PlayerIcons.jpg) <br/> *Player Name* ![Icons](/images/PlayerName.jpg) | *Viewpoint of the Horde* ![Icons](/images/HordeChat.png) <br/> *Viewpoint of the Alliance* ![Icons](/images/AllianceChat.jpg) <br/> *Viewpoint of a GM* ![Icons](/images/GMChat.jpg) |
-|                                                                        **Chat Filters**                                                                         |                                                                                **Improved Usability**                                                                                |
-|                                    *Obscenities* ![Obscenity](/images/Profanities.jpg) <br/> *URLs* ![Url](/images/Url.jpg)                                     |   *Join and Leave the Chat* ![Icons](/images/JoinLeaveGlobal.gif) <br/> *Click to Chat* ![Url](/images/ClickChat.gif) <br/>  *Use like a Channel* ![Url](/images/JoinChannel.gif)    |
+|                                                                          Chat Customization                                                                          |                                                                              **Faction Specific Chat**                                                                               |
+|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| *Chat Name & Prefix* ![Url](/images/ChatPrefix.jpg) <br/> *Player Icons* ![Icons](/images/PlayerIcons.jpg) <br/> *Player Name* ![PlayerName](/images/PlayerName.jpg) | *Viewpoint of the Horde* ![Horde](/images/HordeChat.png) <br/> *Viewpoint of the Alliance* ![Alliance](/images/AllianceChat.jpg) <br/> *Viewpoint of a GM* ![GM](/images/GMChat.jpg) |
+|                                                                            **Filtering**                                                                             |                                                                                **Improved Usability**                                                                                |
+|       *Offensive Language* ![Profanity](/images/Profanities.jpg) <br/> *URLs* ![Url](/images/Url.jpg) <br/> *PlayerInfo*  ![PlayerInfo](/images/ChatInfo.jpg)        | *Join and Leave the Chat* ![Join](/images/JoinLeaveGlobal.gif) <br/> *Click to Chat* ![Click](/images/ClickChat.gif) <br/>  *Use like a Channel* ![Channel](/images/JoinChannel.gif) |
 
 ## Installation
 
@@ -70,4 +70,4 @@ If you need to change the module configuration, go to your server configuration 
 
 ## License
 
-This code and content is released under the [GNU AGPL license](https://github.com/Gozzim/mod-globalchat/blob/master/LICENSE).
+This code and content is released under the [GNU AGPL-3.0 license](https://github.com/Gozzim/mod-globalchat/blob/master/LICENSE).
