@@ -586,7 +586,6 @@ void GlobalChatMgr::SendToPlayers(std::string chatMessage, Player* player, TeamI
     LOG_DEBUG("module", "GlobalChat: Sending Message to Players.");
     std::string chatPrefix = GetChatPrefix();
     std::string gmChatPrefix = GetGMChatPrefix(teamId);
-    ObjectGuid guid = player->GetGUID();
     SessionMap sessions = sWorld->GetAllSessions();
     for (SessionMap::iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
     {
@@ -609,7 +608,7 @@ void GlobalChatMgr::SendToPlayers(std::string chatMessage, Player* player, TeamI
             }
 
             // Skip if receiver has sender on ignore
-            if (!SendIgnored && target->GetSocial()->HasIgnore(guid) && player->GetSession()->GetSecurity() == 0)
+            if (player && !SendIgnored && target->GetSocial()->HasIgnore(player->GetGUID()) && player->GetSession()->GetSecurity() == 0)
                 continue;
 
             if (!FactionSpecific || teamId == TEAM_NEUTRAL || teamId == target->GetTeamId())
@@ -634,11 +633,10 @@ void GlobalChatMgr::SendGlobalChat(WorldSession* session, const char* message, T
 
     if (!session)
     {
-        std::string chatPrefix = GetChatPrefix();
         nameLink = GetNameLink(nullptr);
         chatContent = BuildChatContent(chatText);
 
-        chat_stream << chatPrefix << " " << nameLink << ": ";
+        chat_stream << nameLink << ": ";
         chat_stream << "|cff" << chatColor;
         chat_stream << chatContent;
 
