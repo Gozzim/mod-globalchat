@@ -1,4 +1,4 @@
-@ENTRY = 17000;
+SET @ENTRY := 17000;
 
 DELETE FROM `acore_string` WHERE `entry` IN (@ENTRY+0, @ENTRY+1, @ENTRY+2, @ENTRY+3, @ENTRY+4, @ENTRY+5,@ENTRY+6);
 INSERT INTO `acore_string` (`entry`, `content_default`, `locale_koKR`, `locale_frFR`, `locale_deDE`, `locale_zhCN`, `locale_zhTW`, `locale_esES`, `locale_esMX`, `locale_ruRU`) VALUES
