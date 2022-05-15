@@ -36,6 +36,18 @@ struct ChatProfanityEntry
     char const* Text;
     int32       Language;
 };
+
+enum GlobalChatAcoreStrings
+{
+    LANG_FORBIDDEN_PHRASE_ANNOUNCE_GM = 17000, // Entry from sql acore_strings
+    LANG_FORBIDDEN_URL_ANNOUNCE_GM,
+    LANG_GLOBALCHAT_STATE_ANNOUNCE_WORLD,
+    LANG_GLOBALCHAT_PLAYER_MUTED_ANNOUNCE_WORLD,
+    LANG_GLOBALCHAT_PLAYER_BANNED_ANNOUNCE_WORLD,
+    LANG_GLOBALCHAT_MUTED_ANNOUNCE_SELF,
+    LANG_GLOBALCHAT_BANNED_ANNOUNCE_SELF,
+};
+
 char constexpr ChatProfanityEntryfmt[] = "dsi";
 
 class GlobalChatMgr
