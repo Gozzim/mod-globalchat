@@ -11,8 +11,7 @@
 **Advanced GlobalChat** with around **30 configuration options**.\
 This GlobalChat allows you to configure the module to your individual needs!
 
-**Requires at least commit https://github.com/azerothcore/azerothcore-wotlk/commit/58302e41969e16dfe1ba93792622d990c03f2b2f of Acore**
-
+**Requires at least commit [58302e4](https://github.com/azerothcore/azerothcore-wotlk/commit/58302e41969e16dfe1ba93792622d990c03f2b2f) of [AzerothCore](https://github.com/azerothcore/azerothcore-wotlk)**
 
 ## Features
 
