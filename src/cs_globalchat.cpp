@@ -180,7 +180,7 @@ public:
         std::string muteReasonStr{ muteReason };
         ObjectGuid guid = target->GetGUID();
 
-        if (atoi(duration.c_str()) < 0)
+        if (atoi(duration.c_str()) <= 0)
         {
             sGlobalChatMgr->Ban(guid);
             LOG_INFO("module", "GlobalChat: Player {} banned {} in GlobalChat.", playerName, target->GetName());
